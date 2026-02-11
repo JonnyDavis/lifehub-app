@@ -1,5 +1,7 @@
 // Home page for the dashboard section of the application
 
+import Link from "next/link";
+
 export default function Page() {
   return (
     <>
@@ -11,7 +13,15 @@ export default function Page() {
       </div>
       <div className="grid md:grid-cols-2 gap-6">
         <div className="bg-gray-200 p-4 rounded text-black">
-          <h3 className="text-lg font-semibold mb-2">Lists</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold mb-2">Lists</h3>
+            <Link
+              href="/dashboard/lists"
+              className="text-blue-500 hover:underline"
+            >
+              View All Lists
+            </Link>
+          </div>
           <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-gray-300 p-3 rounded">Grocery List</div>
             <div className="bg-gray-300 p-3 rounded">Work Tasks</div>

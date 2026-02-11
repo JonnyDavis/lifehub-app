@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -17,7 +18,7 @@ export default function Home() {
             LifeHub App
           </h1>
           <p>
-            Dashboard link: <a href="/dashboard/home">Go to Dashboard</a>
+            Dashboard link: <Link href="/dashboard/home">Go to Dashboard</Link>
           </p>
           <form className="grid grid-cols-1 gap-4 w-full max-w-md">
             <input
