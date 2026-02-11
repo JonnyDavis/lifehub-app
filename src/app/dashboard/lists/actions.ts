@@ -35,3 +35,41 @@ export async function createList(formData: FormData) {
 
   redirect("/dashboard/lists");
 }
+
+export async function createListItem(formData: FormData) {
+  const listId = formData.get("listId");
+  const label = formData.get("label");
+  const quantity = formData.get("quantity");
+
+  if (!listId || typeof listId !== "string") {
+    console.error("Missing or invalid listId in createListItem");
+    return;
+  }
+
+  if (!label || typeof label !== "string" || label.trim().length === 0) {
+    // TODO - return error state to UI
+    return;
+  }
+
+  const cleanLabel = label.trim();
+  const cleanQuantity =
+    typeof quantity === "string" && quantity.trim().length > 0
+      ? quantity.trim()
+      : null;
+
+  const { error } = await supabase.from("list_items").insert({
+    list_id: listId,
+    label: cleanLabel,
+    quantity: cleanQuantity,
+    is_done: false,
+    // position: TODO - need to determine the correct position value for the new item
+  });
+
+  if (error) {
+    console.error("Error creating list item:", error);
+    return;
+  }
+
+  // Revalidate the list detail page so the new item shows up
+  revalidatePath(`/dashboard/lists/${listId}`);
+}

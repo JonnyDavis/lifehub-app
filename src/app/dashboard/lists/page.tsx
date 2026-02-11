@@ -1,8 +1,8 @@
 // Lists page for the dashboard section of the application
 
+import { createList } from "@/app/dashboard/lists/actions";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { createList } from "./actions";
 
 export default async function Page() {
   const { data: lists, error } = await supabase
