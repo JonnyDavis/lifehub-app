@@ -1,8 +1,19 @@
 // Home page for the dashboard section of the application
 
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 
-export default function Page() {
+export default async function Page() {
+  const { data: lists, error } = await supabase
+    .from("lists")
+    .select("id, title, icon, type")
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error(error);
+    return <div>Error loading lists</div>;
+  }
+
   return (
     <>
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -12,7 +23,7 @@ export default function Page() {
         <div className="bg-gray-200 p-4 rounded text-black">Summary 4</div>
       </div>
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-gray-200 p-4 rounded text-black">
+        <div className="bg-gray-300 p-4 rounded text-black">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold mb-2">Lists</h3>
             <Link
@@ -23,10 +34,23 @@ export default function Page() {
             </Link>
           </div>
           <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-gray-300 p-3 rounded">Grocery List</div>
-            <div className="bg-gray-300 p-3 rounded">Work Tasks</div>
-            <div className="bg-gray-300 p-3 rounded">Personal Goals</div>
-            <div className="bg-gray-300 p-3 rounded">Travel Plans</div>
+
+
+            {(!lists || lists.length === 0) ? (
+              <div className="text-gray-500">No lists available</div>
+            ) : (
+              lists.map((list) => (
+                <Link
+                  key={list.id}
+                  href={`/dashboard/lists/${list.id}`}
+                  className="flex gap-4 bg-gray-200 p-4 rounded text-black"
+                >
+                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                  {list.icon ?? list.title[0]}
+                </div>
+                <h2 className="text-lg font-semibold mb-2">{list.title}</h2>
+              </Link>
+            )))}
           </div>
         </div>
         <div className="bg-gray-200 p-4 rounded text-black">
