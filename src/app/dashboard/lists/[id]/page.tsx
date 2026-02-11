@@ -1,5 +1,6 @@
 // Page for individual list details
 
+import { createListItem } from "@/app/dashboard/lists/actions";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
@@ -61,6 +62,49 @@ export default async function Page({ params }: ListPageProps) {
           <h2 className="text-lg font-semibold mb-2">{list.title}</h2>
         </div>
         <hr className="my-4" />
+
+        <h3 className="text-md font-semibold mb-2">Add item</h3>
+        <form
+          action={createListItem}
+          className="mb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-end"
+        >
+          <input type="hidden" name="listId" value={list.id} />
+
+          <div className="flex-1">
+            <label htmlFor="label" className="sr-only">
+              Item name
+            </label>
+            <input
+              id="label"
+              name="label"
+              type="text"
+              required
+              placeholder="Item name"
+              className="w-full rounded border border-gray-300 px-3 py-2 text-sm text-black"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="quantity" className="sr-only">
+              Quantity
+            </label>
+            <input
+              id="quantity"
+              name="quantity"
+              type="text"
+              placeholder="Quantity (optional)"
+              className="w-full rounded border border-gray-300 px-3 py-2 text-sm text-black"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="rounded bg-black text-white px-4 py-2 text-sm font-medium"
+          >
+            Add
+          </button>
+        </form>
+
         {safeItems.length === 0 ? (
           <div className="text-gray-500">No items in this list. Add some!</div>
         ) : (
