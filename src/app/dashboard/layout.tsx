@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
@@ -7,6 +9,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <h1>LifeHub</h1>
             <h2>Welcome to your dashboard</h2>
           </hgroup>
+          <nav className="flex gap-4 text-sm">
+            <Link href="/dashboard" className="hover:underline">
+              Overview
+            </Link>
+            <Link href="/dashboard/lists" className="hover:underline">
+              Lists
+            </Link>
+            {/* Dates later */}
+          </nav>
           <div className="flex gap-2">
             <button>Add List</button>
             <button>Add Date</button>
