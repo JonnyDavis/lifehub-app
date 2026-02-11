@@ -18,7 +18,7 @@ export default function Home() {
             LifeHub App
           </h1>
           <p>
-            Dashboard link: <Link href="/dashboard/home">Go to Dashboard</Link>
+            Dashboard link: <Link href="/dashboard">Go to Dashboard</Link>
           </p>
           <form className="grid grid-cols-1 gap-4 w-full max-w-md">
             <input
