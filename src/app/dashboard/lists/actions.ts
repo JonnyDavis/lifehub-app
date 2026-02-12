@@ -73,3 +73,59 @@ export async function createListItem(formData: FormData) {
   // Revalidate the list detail page so the new item shows up
   revalidatePath(`/dashboard/lists/${listId}`);
 }
+
+export async function toggleListItem(formData: FormData) {
+  const itemId = formData.get("itemId");
+  const listId = formData.get("listId");
+  const nextDone = formData.get("nextDone");
+
+  if (!itemId || typeof itemId !== "string") {
+    console.error("Missing or invalid itemId in toggleListItem");
+    return;
+  }
+
+  if (!listId || typeof listId !== "string") {
+    console.error("Missing or invalid listId in toggleListItem");
+    return;
+  }
+
+  const nextIsDone = nextDone === "true";
+
+  const { error } = await supabase
+    .from("list_items")
+    .update({
+      is_done: nextIsDone,
+    })
+    .eq("id", itemId);
+
+  if (error) {
+    console.error("Error toggling list item:", error);
+    return;
+  }
+
+  revalidatePath(`/dashboard/lists/${listId}`);
+}
+
+export async function deleteListItem(formData: FormData) {
+  const itemId = formData.get("itemId");
+  const listId = formData.get("listId");
+
+  if (!itemId || typeof itemId !== "string") {
+    console.error("Missing or invalid itemId in deleteListItem");
+    return;
+  }
+
+  if (!listId || typeof listId !== "string") {
+    console.error("Missing or invalid listId in deleteListItem");
+    return;
+  }
+
+  const { error } = await supabase.from("list_items").delete().eq("id", itemId);
+
+  if (error) {
+    console.error("Error deleting list item:", error);
+    return;
+  }
+
+  revalidatePath(`/dashboard/lists/${listId}`);
+}

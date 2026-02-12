@@ -1,8 +1,13 @@
 // Page for individual list details
 
-import { createListItem } from "@/app/dashboard/lists/actions";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import {
+  createListItem,
+  toggleListItem,
+  deleteListItem,
+} from "@/app/dashboard/lists/actions";
+import { ToggleItemCheckbox } from "@/app/dashboard/lists/ToggleItemCheckbox";
 
 type ListPageProps = {
   params: Promise<{ id: string }>;
@@ -38,13 +43,15 @@ export default async function Page({ params }: ListPageProps) {
     .from("list_items")
     .select("id, label, quantity, is_done, position")
     .eq("list_id", id)
-    .order("position", { ascending: true });
+    .order("created_at", { ascending: true });
 
   if (itemsError) {
     console.error("Error fetching list items:", itemsError);
   }
 
   const safeItems = items ?? [];
+  const todoItems = safeItems.filter((item) => !item.is_done);
+  const doneItems = safeItems.filter((item) => item.is_done);
 
   return (
     <>
@@ -105,29 +112,115 @@ export default async function Page({ params }: ListPageProps) {
           </button>
         </form>
 
-        {safeItems.length === 0 ? (
+        {todoItems.length === 0 ? (
           <div className="text-gray-500">No items in this list. Add some!</div>
         ) : (
           <ul className="space-y-2">
-            {safeItems.map((item) => (
-              <li key={item.id} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={item.is_done}
-                  readOnly
-                  className="w-4 h-4"
-                />
-                <span
-                  className={item.is_done ? "line-through text-gray-500" : ""}
+            {todoItems.map((item) => (
+              <li
+                key={item.id}
+                className="flex items-center gap-2 justify-between"
+              >
+                {/* Left side: toggle form + label */}
+                <form
+                  action={toggleListItem}
+                  className="flex items-center gap-2 flex-1"
                 >
-                  {item.label}
-                  {item.quantity && (
-                    <span className="text-xs text-gray-500">
-                      {" "}
-                      ({item.quantity})
-                    </span>
-                  )}
-                </span>
+                  <ToggleItemCheckbox
+                    itemId={item.id}
+                    listId={list.id}
+                    done={item.is_done}
+                  />
+                  <span
+                    className={item.is_done ? "line-through text-gray-500" : ""}
+                  >
+                    {item.label}
+                    {item.quantity && (
+                      <span className="text-xs text-gray-500">
+                        {" "}
+                        ({item.quantity})
+                      </span>
+                    )}
+                  </span>
+
+                  <button
+                    type="submit"
+                    className="text-xs text-blue-600 underline"
+                  >
+                    Toggle
+                  </button>
+                </form>
+
+                {/* Right side: delete form */}
+                <form action={deleteListItem}>
+                  <input type="hidden" name="itemId" value={item.id} />
+                  <input type="hidden" name="listId" value={list.id} />
+                  <button
+                    type="submit"
+                    className="text-xs text-red-600 underline"
+                  >
+                    Delete
+                  </button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <hr className="my-4 text-gray-300" />
+
+        <h3 className="text-md font-semibold mb-2">Completed items</h3>
+
+        {doneItems.length === 0 ? (
+          <div className="text-gray-500">No items in this list. Add some!</div>
+        ) : (
+          <ul className="space-y-2">
+            {doneItems.map((item) => (
+              <li
+                key={item.id}
+                className="flex items-center gap-2 justify-between"
+              >
+                {/* Left side: toggle form + label */}
+                <form
+                  action={toggleListItem}
+                  className="flex items-center gap-2 flex-1"
+                >
+                  <ToggleItemCheckbox
+                    itemId={item.id}
+                    listId={list.id}
+                    done={item.is_done}
+                  />
+                  <span
+                    className={item.is_done ? "line-through text-gray-500" : ""}
+                  >
+                    {item.label}
+                    {item.quantity && (
+                      <span className="text-xs text-gray-500">
+                        {" "}
+                        ({item.quantity})
+                      </span>
+                    )}
+                  </span>
+
+                  <button
+                    type="submit"
+                    className="text-xs text-blue-600 underline"
+                  >
+                    Toggle
+                  </button>
+                </form>
+
+                {/* Right side: delete form */}
+                <form action={deleteListItem}>
+                  <input type="hidden" name="itemId" value={item.id} />
+                  <input type="hidden" name="listId" value={list.id} />
+                  <button
+                    type="submit"
+                    className="text-xs text-red-600 underline"
+                  >
+                    Delete
+                  </button>
+                </form>
               </li>
             ))}
           </ul>
