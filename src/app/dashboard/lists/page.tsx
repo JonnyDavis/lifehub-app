@@ -2,18 +2,10 @@
 
 import { createList } from "@/app/dashboard/lists/actions";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
+import { getLists } from "@/lib/queries/lists";
 
 export default async function Page() {
-  const { data: lists, error } = await supabase
-    .from("lists")
-    .select("id, title, icon, type")
-    .order("created_at", { ascending: true });
-
-  if (error) {
-    console.error(error);
-    return <div>Error loading lists</div>;
-  }
+  const lists = await getLists();
 
   return (
     <div>

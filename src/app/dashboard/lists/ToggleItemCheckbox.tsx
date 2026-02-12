@@ -39,6 +39,7 @@ export function ToggleItemCheckbox({
   return (
     <input
       type="checkbox"
+      name={`item-done-${itemId}`}
       className="w-4 h-4"
       checked={checked}
       disabled={isPending}
