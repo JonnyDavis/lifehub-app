@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { createListItem } from "@/lib/actions/lists";
-import ListItems from "@/app/dashboard/lists/components/ListItems";
+import ListItemsSection from "@/app/dashboard/lists/components/ListItemsSection";
 import { requireListById, getListItems } from "@/lib/queries/lists";
 
 type ListPageProps = {
@@ -29,71 +29,73 @@ export default async function Page({ params }: ListPageProps) {
       >
         &larr; Back to Lists
       </Link>
-      <div className="bg-gray-200 p-4 rounded text-black">
-        <div className="flex gap-4">
+      <article className="bg-gray-200 p-4 rounded text-black">
+        <section className="flex gap-4">
           <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
             {list.icon ?? list.title[0]}
           </div>
           <h2 className="text-lg font-semibold mb-2">{list.title}</h2>
-        </div>
+        </section>
         <hr className="my-4" />
 
-        <h3 className="text-md font-semibold mb-2">Add item</h3>
-        <form
-          action={createListItem}
-          className="mb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-end"
-        >
-          <input type="hidden" name="listId" value={list.id} />
-
-          <div className="flex-1">
-            <label htmlFor="label" className="sr-only">
-              Item name
-            </label>
-            <input
-              id="label"
-              name="label"
-              type="text"
-              required
-              placeholder="Item name"
-              className="w-full rounded border border-gray-300 px-3 py-2 text-sm text-black"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="quantity" className="sr-only">
-              Quantity
-            </label>
-            <input
-              id="quantity"
-              name="quantity"
-              type="text"
-              placeholder="Quantity (optional)"
-              className="w-full rounded border border-gray-300 px-3 py-2 text-sm text-black"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="rounded bg-black text-white px-4 py-2 text-sm font-medium"
+        <section>
+          <h3 className="text-md font-semibold mb-2">Add item</h3>
+          <form
+            action={createListItem}
+            className="mb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-end"
           >
-            Add
-          </button>
-        </form>
+            <input type="hidden" name="listId" value={list.id} />
 
-        {todoItems.length === 0 ? (
-          <div className="text-gray-500">No items in this list. Add some!</div>
-        ) : (
-          <ListItems items={todoItems} listId={list.id} />
-        )}
+            <div className="flex-1">
+              <label htmlFor="label" className="sr-only">
+                Item name
+              </label>
+              <input
+                id={`label-${list.id}`}
+                name="label"
+                type="text"
+                required
+                placeholder="Item name"
+                className="w-full rounded border border-gray-300 px-3 py-2 text-sm text-black"
+              />
+            </div>
 
-        {doneItems.length > 0 && (
-          <>
-            <hr className="my-4 text-gray-300" />
-            <h3 className="text-md font-semibold mb-2">Completed items</h3>
-            <ListItems items={doneItems} listId={list.id} />
-          </>
-        )}
-      </div>
+            <div>
+              <label htmlFor="quantity" className="sr-only">
+                Quantity
+              </label>
+              <input
+                id={`quantity-${list.id}`}
+                name="quantity"
+                type="text"
+                placeholder="Quantity (optional)"
+                className="w-full rounded border border-gray-300 px-3 py-2 text-sm text-black"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="rounded bg-black text-white px-4 py-2 text-sm font-medium"
+            >
+              Add
+            </button>
+          </form>
+        </section>
+
+        <ListItemsSection
+          title="To do"
+          items={todoItems}
+          listId={list.id}
+          emptyMessage="No items in this list. Add some!"
+        />
+
+        <ListItemsSection
+          title="Completed items"
+          items={doneItems}
+          listId={list.id}
+          hideIfEmpty
+        />
+      </article>
     </>
   );
 }

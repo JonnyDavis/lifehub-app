@@ -8,7 +8,7 @@ export default async function Page() {
   const lists = await getLists();
 
   return (
-    <div>
+    <article>
       <h1 className="text-2xl font-bold mb-4">Your Lists</h1>
 
       <section className="bg-gray-100 p-4 rounded mb-6">
@@ -62,7 +62,7 @@ export default async function Page() {
         </form>
       </section>
 
-      <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <section className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {!lists || lists.length === 0 ? (
           <div className="text-gray-500">
             No lists found. Start by creating a new list above.
@@ -81,7 +81,7 @@ export default async function Page() {
             </Link>
           ))
         )}
-      </div>
-    </div>
+      </section>
+    </article>
   );
 }

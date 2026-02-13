@@ -34,6 +34,7 @@ export default function ListItemsRow({ item, listId }: Props) {
         <button
           type="submit"
           className="text-xs text-red-600 underline px-2 py-2"
+          aria-label={`Delete ${item.label}`}
         >
           Delete
         </button>
