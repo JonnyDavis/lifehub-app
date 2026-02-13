@@ -1,22 +1,14 @@
 // Lists page for the dashboard section of the application
 
-import { createList } from "@/app/dashboard/lists/actions";
+import { createList } from "@/lib/actions/lists";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
+import { getLists } from "@/lib/queries/lists";
 
 export default async function Page() {
-  const { data: lists, error } = await supabase
-    .from("lists")
-    .select("id, title, icon, type")
-    .order("created_at", { ascending: true });
-
-  if (error) {
-    console.error(error);
-    return <div>Error loading lists</div>;
-  }
+  const lists = await getLists();
 
   return (
-    <div>
+    <article>
       <h1 className="text-2xl font-bold mb-4">Your Lists</h1>
 
       <section className="bg-gray-100 p-4 rounded mb-6">
@@ -70,25 +62,26 @@ export default async function Page() {
         </form>
       </section>
 
-      <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <section className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {!lists || lists.length === 0 ? (
           <div className="text-gray-500">
             No lists found. Start by creating a new list above.
           </div>
         ) : (
-        lists.map((list) => (
-          <Link
-            key={list.id}
-            href={`/dashboard/lists/${list.id}`}
-            className="flex gap-4 bg-gray-200 p-4 rounded text-black"
-          >
-            <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-              {list.icon ?? list.title[0]}
-            </div>
-            <h2 className="text-lg font-semibold mb-2">{list.title}</h2>
-          </Link>
-        )))}
-      </div>
-    </div>
+          lists.map((list) => (
+            <Link
+              key={list.id}
+              href={`/dashboard/lists/${list.id}`}
+              className="flex gap-4 bg-gray-200 p-4 rounded text-black"
+            >
+              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                {list.icon ?? list.title[0]}
+              </div>
+              <h2 className="text-lg font-semibold mb-2">{list.title}</h2>
+            </Link>
+          ))
+        )}
+      </section>
+    </article>
   );
 }

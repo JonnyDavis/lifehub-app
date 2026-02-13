@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { toggleListItem } from "@/app/dashboard/lists/actions";
+import { toggleListItem } from "@/lib/actions/lists";
 
 type ToggleItemCheckboxProps = {
   itemId: string;
@@ -39,6 +39,7 @@ export function ToggleItemCheckbox({
   return (
     <input
       type="checkbox"
+      name={`item-done-${itemId}`}
       className="w-4 h-4"
       checked={checked}
       disabled={isPending}
