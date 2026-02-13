@@ -68,18 +68,19 @@ export default async function Page() {
             No lists found. Start by creating a new list above.
           </div>
         ) : (
-        lists.map((list) => (
-          <Link
-            key={list.id}
-            href={`/dashboard/lists/${list.id}`}
-            className="flex gap-4 bg-gray-200 p-4 rounded text-black"
-          >
-            <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-              {list.icon ?? list.title[0]}
-            </div>
-            <h2 className="text-lg font-semibold mb-2">{list.title}</h2>
-          </Link>
-        )))}
+          lists.map((list) => (
+            <Link
+              key={list.id}
+              href={`/dashboard/lists/${list.id}`}
+              className="flex gap-4 bg-gray-200 p-4 rounded text-black"
+            >
+              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                {list.icon ?? list.title[0]}
+              </div>
+              <h2 className="text-lg font-semibold mb-2">{list.title}</h2>
+            </Link>
+          ))
+        )}
       </div>
     </div>
   );
