@@ -1,7 +1,7 @@
 // Component for rendering a single item within a list, along with toggle and delete actions.
 
 import { ListItem } from "@/types/lists";
-import { deleteListItem } from "@/app/dashboard/lists/actions";
+import { deleteListItem } from "@/lib/actions/lists";
 import { ToggleItemCheckbox } from "@/app/dashboard/lists/ToggleItemCheckbox";
 
 type Props = {

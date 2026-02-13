@@ -1,6 +1,6 @@
 // Lists page for the dashboard section of the application
 
-import { createList } from "@/app/dashboard/lists/actions";
+import { createList } from "@/lib/actions/lists";
 import Link from "next/link";
 import { getLists } from "@/lib/queries/lists";
 

@@ -1,7 +1,7 @@
 // Page for individual list details
 
 import Link from "next/link";
-import { createListItem } from "@/app/dashboard/lists/actions";
+import { createListItem } from "@/lib/actions/lists";
 import ListItems from "@/app/dashboard/lists/components/ListItems";
 import { requireListById, getListItems } from "@/lib/queries/lists";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { toggleListItem } from "@/app/dashboard/lists/actions";
+import { toggleListItem } from "@/lib/actions/lists";
 
 type ToggleItemCheckboxProps = {
   itemId: string;
