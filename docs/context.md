@@ -39,10 +39,10 @@ This repo is also intended as a portfolio project: keep patterns clean and easy 
 
 ## Local development (Supabase CLI)
 
-- Local Supabase runs via Docker + the Supabase CLI: `npx supabase start` (and `npx supabase status` to view local URLs/keys).
-- Point the app at local Supabase by setting `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` to the **local** values printed by the CLI.
-- Local Studio is typically at `http://localhost:54323`; the local email inbox (Inbucket) is typically at `http://localhost:54324` (prefer the URLs printed by `supabase status`).
-- Schema is tracked in `supabase/migrations/` (commit these). Local-only data dumps/seeds live in `supabase/seed.sql` (git-ignored by `supabase/.gitignore`).
+- Local Supabase runs via Docker + the Supabase CLI: `npx supabase start` (and `npx supabase status` for URLs/keys).
+- Point the app at local Supabase by setting `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` to the local values printed by the CLI.
+- Local schema is tracked in `supabase/migrations/` (commit these).
+- See `docs/supabase-workflow.md` for the full local-first → push-to-prod workflow.
 
 ## Environment variables (names only)
 
