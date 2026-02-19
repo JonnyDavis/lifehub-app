@@ -5,3 +5,17 @@ export function getSafeNext(value: unknown) {
   return value;
 }
 
+export function getSafeNextFromOrigin(value: unknown, origin: string) {
+  const asPath = getSafeNext(value);
+  if (asPath) return asPath;
+
+  if (typeof value !== "string") return null;
+
+  try {
+    const url = new URL(value);
+    if (url.origin !== origin) return null;
+    return `${url.pathname}${url.search}`;
+  } catch {
+    return null;
+  }
+}

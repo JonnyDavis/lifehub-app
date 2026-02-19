@@ -225,6 +225,14 @@ otp_expiry = 3600
 
 # Use a production-ready SMTP server
 # [auth.email.smtp]
+
+[auth.email.template.confirmation]
+subject = "Confirm your signup"
+content_path = "./supabase/templates/confirmation.html"
+
+[auth.email.template.recovery]
+subject = "Reset Password"
+content_path = "./supabase/templates/recovery.html"
 # enabled = true
 # host = "smtp.sendgrid.net"
 # port = 587
