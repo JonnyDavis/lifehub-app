@@ -37,6 +37,13 @@ This repo is also intended as a portfolio project: keep patterns clean and easy 
 - Lists + list items are stored in Supabase tables `lists` and `list_items`.
 - Current lists queries/actions use the Supabase client from `src/lib/supabase.ts`.
 
+## Local development (Supabase CLI)
+
+- Local Supabase runs via Docker + the Supabase CLI: `npx supabase start` (and `npx supabase status` to view local URLs/keys).
+- Point the app at local Supabase by setting `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` to the **local** values printed by the CLI.
+- Local Studio is typically at `http://localhost:54323`; the local email inbox (Inbucket) is typically at `http://localhost:54324` (prefer the URLs printed by `supabase status`).
+- Schema is tracked in `supabase/migrations/` (commit these). Local-only data dumps/seeds live in `supabase/seed.sql` (git-ignored by `supabase/.gitignore`).
+
 ## Environment variables (names only)
 
 - `NEXT_PUBLIC_SUPABASE_URL`

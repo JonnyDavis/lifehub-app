@@ -1,0 +1,12 @@
+# Supabase
+.branches
+.temp
+
+# Local-only dumps/seeds (may contain real data)
+seed.sql
+schema.sql
+
+# dotenvx
+.env.keys
+.env.local
+.env.*.local
