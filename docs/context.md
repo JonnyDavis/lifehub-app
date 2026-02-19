@@ -22,6 +22,7 @@ This repo is also intended as a portfolio project: keep patterns clean and easy 
 
 ### App (protected)
 
+- `/` – redirects to `/dashboard` if authenticated, otherwise `/auth/login` (supports `?next=/some/path`)
 - `/dashboard` – overview page (lists summary; dates are placeholder)
 - `/dashboard/lists` – lists index
 - `/dashboard/lists/[id]` – list detail + items
@@ -55,4 +56,3 @@ When you change any of these, update this file:
 - auth flows (signup confirm, reset password)
 - table shapes used by code
 - “what’s implemented vs planned”
-
