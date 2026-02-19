@@ -12,11 +12,14 @@ function getSafeNext(value: unknown) {
 export default async function Page({
   searchParams,
 }: {
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams?:
+    | Record<string, string | string[] | undefined>
+    | Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const nextParam = Array.isArray(searchParams?.next)
-    ? searchParams?.next[0]
-    : searchParams?.next;
+  const resolvedSearchParams = await searchParams;
+  const nextParam = Array.isArray(resolvedSearchParams?.next)
+    ? resolvedSearchParams?.next[0]
+    : resolvedSearchParams?.next;
   const next = getSafeNext(nextParam);
 
   const supabase = await createClient();
