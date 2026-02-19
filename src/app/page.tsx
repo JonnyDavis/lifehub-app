@@ -1,13 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
-
-function getSafeNext(value: unknown) {
-  if (typeof value !== "string") return null;
-  if (!value.startsWith("/")) return null;
-  if (value.startsWith("//")) return null;
-  return value;
-}
+import { getSafeNext } from "@/lib/routing/get-safe-next";
 
 export default async function Page({
   searchParams,
