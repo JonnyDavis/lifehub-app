@@ -1,6 +1,20 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { LogoutButton } from "@/components/logout-button";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default async function Layout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.auth.getClaims();
+  if (error || !data?.claims) {
+    redirect("/auth/login");
+  }
+
   return (
     <>
       <header className="bg-gray-800 text-white">
@@ -18,9 +32,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </Link>
             {/* Dates later */}
           </nav>
-          <div className="flex gap-2">
-            <button>Add List</button>
-            <button>Add Date</button>
+          <div className="flex items-center gap-4">
+            <LogoutButton />
           </div>
         </div>
       </header>
