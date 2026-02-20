@@ -32,6 +32,14 @@ When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`):
 
 `/dashboard/*` is protected in `src/app/dashboard/layout.tsx` via `supabase.auth.getClaims()`.
 
+#### Protected routes + session refresh (Next.js Proxy)
+
+- This app uses Next.js “Proxy” at `src/proxy.ts` to keep Supabase auth cookies in sync (refresh token rotation).
+- Redirects for unauthenticated users are handled in `src/lib/supabase/proxy.ts` and are currently enforced for `/dashboard/*`.
+- If you add new protected route prefixes outside `/dashboard`, update both:
+  - `src/lib/supabase/proxy.ts` (`isProtectedRoute`)
+  - `src/proxy.ts` (`config.matcher`)
+
 ## Data + auth (how it works today)
 
 - Supabase Auth powers sessions.
