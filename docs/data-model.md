@@ -24,15 +24,16 @@ Used fields:
 - `position` (int, nullable)
 - `created_at` (timestamptz)
 
-## Planned (not fully implemented yet)
-
 ### `important_dates`
 
+Used fields:
 - `id` (uuid)
 - `title` (text)
 - `date` (date)
 - `notes` (text, nullable)
 - `created_at` (timestamptz)
+
+## Planned (not fully implemented yet)
 
 ### Household scoping
 
@@ -44,4 +45,3 @@ Potential tables:
 - `household_members`
 
 Follow-up: once household scoping exists, `lists` / `important_dates` gain a `household_id`.
-

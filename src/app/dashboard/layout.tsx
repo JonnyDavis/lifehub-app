@@ -30,7 +30,9 @@ export default async function Layout({
             <Link href="/dashboard/lists" className="hover:underline">
               Lists
             </Link>
-            {/* Dates later */}
+            <Link href="/dashboard/dates" className="hover:underline">
+              Dates
+            </Link>
           </nav>
           <div className="flex items-center gap-4">
             <LogoutButton />
