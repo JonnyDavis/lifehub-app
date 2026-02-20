@@ -41,10 +41,14 @@ export async function updateSession(request: NextRequest) {
 
   const user = data?.claims;
 
-  if (!user) {
+  const pathname = request.nextUrl.pathname;
+  const isProtectedRoute = pathname.startsWith("/dashboard");
+
+  if (!user && isProtectedRoute) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
+    url.searchParams.set("next", `${pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(url);
   }
 
