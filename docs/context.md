@@ -35,7 +35,7 @@ This repo is also intended as a portfolio project: keep patterns clean and easy 
 - Supabase Auth powers sessions.
 - Server-side auth reads/writes cookies via `@supabase/ssr` (`src/lib/supabase/server.ts`).
 - Lists + list items are stored in Supabase tables `lists` and `list_items`.
-- Current lists queries/actions use the Supabase client from `src/lib/supabase.ts`.
+- Current lists queries/actions use the Supabase server client from `src/lib/supabase/server.ts`.
 
 ## Local development (Supabase CLI)
 
