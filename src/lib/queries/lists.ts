@@ -1,7 +1,9 @@
-import { supabase } from "@/lib/supabase";
 import { notFound } from "next/navigation";
 
+import { createClient } from "@/lib/supabase/server";
+
 export async function getLists() {
+  const supabase = await createClient();
   const { data: lists, error } = await supabase
     .from("lists")
     .select("id, title, icon, type")
@@ -16,6 +18,7 @@ export async function getLists() {
 }
 
 export async function getListById(id: string) {
+  const supabase = await createClient();
   const { data: list, error: error } = await supabase
     .from("lists")
     .select("id, title, icon, type")
@@ -44,6 +47,7 @@ export async function requireListById(id: string) {
 }
 
 export async function getListItems(listId: string) {
+  const supabase = await createClient();
   const { data: items, error } = await supabase
     .from("list_items")
     .select("id, label, quantity, is_done, position")

@@ -2,9 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+
+import { createClient } from "@/lib/supabase/server";
 
 export async function createList(formData: FormData) {
+  const supabase = await createClient();
   const title = formData.get("title");
   const type = formData.get("type");
 
@@ -37,6 +39,7 @@ export async function createList(formData: FormData) {
 }
 
 export async function createListItem(formData: FormData) {
+  const supabase = await createClient();
   const listId = formData.get("listId");
   const label = formData.get("label");
   const quantity = formData.get("quantity");
@@ -75,6 +78,7 @@ export async function createListItem(formData: FormData) {
 }
 
 export async function toggleListItem(formData: FormData) {
+  const supabase = await createClient();
   const itemId = formData.get("itemId");
   const listId = formData.get("listId");
   const nextDone = formData.get("nextDone");
@@ -107,6 +111,7 @@ export async function toggleListItem(formData: FormData) {
 }
 
 export async function deleteListItem(formData: FormData) {
+  const supabase = await createClient();
   const itemId = formData.get("itemId");
   const listId = formData.get("listId");
 

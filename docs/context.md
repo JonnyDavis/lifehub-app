@@ -14,11 +14,13 @@ This repo is also intended as a portfolio project: keep patterns clean and easy 
 
 - `/auth/login` – email/password login UI
 - `/auth/sign-up` – email/password sign up UI
-- `/auth/sign-up-success` – post-signup confirmation screen
+- `/auth/sign-up-success` – shown after sign up when email confirmation is required
 - `/auth/forgot-password` – request reset email
-- `/auth/update-password` – set new password (requires active reset session)
+- `/auth/update-password` – set new password (requires active reset session; redirects to login if not authenticated)
 - `/auth/confirm` – GET route handler that verifies Supabase OTP
 - `/auth/error` – simple error page
+
+When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`): `/auth/login`, `/auth/sign-up`, `/auth/forgot-password`, `/auth/sign-up-success`.
 
 ### App (protected)
 
@@ -35,7 +37,7 @@ This repo is also intended as a portfolio project: keep patterns clean and easy 
 - Supabase Auth powers sessions.
 - Server-side auth reads/writes cookies via `@supabase/ssr` (`src/lib/supabase/server.ts`).
 - Lists + list items are stored in Supabase tables `lists` and `list_items`.
-- Current lists queries/actions use the Supabase client from `src/lib/supabase.ts`.
+- Current lists queries/actions use the Supabase server client from `src/lib/supabase/server.ts`.
 
 ## Local development (Supabase CLI)
 
