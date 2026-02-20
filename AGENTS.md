@@ -11,7 +11,8 @@ This repo is a small portfolio-grade Next.js app (“LifeHub”) for shared hous
 ## Guardrails
 
 - Do not modify repo files unless explicitly asked to (when unsure, ask first).
-- When proposing changes, stop after analysis + a minimal diff proposal; wait for explicit confirmation before making edits.
+- Always talk through the bug/change first (root cause + intended behavior), then propose a minimal diff; wait for an explicit “go ahead/apply the patch” before making edits.
+- Do not run git staging/commit/push commands unless explicitly asked.
 - Do **not** copy/paste secrets. Never commit `.env.local` values.
 - If you need to mention env vars in docs/code review, list **names only** (e.g. `NEXT_PUBLIC_SUPABASE_URL`).
 - Prefer small diffs. Avoid drive-by refactors unless explicitly requested.
