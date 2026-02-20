@@ -4,7 +4,10 @@ import {
   createImportantDate,
   deleteImportantDate,
 } from "@/lib/actions/important-dates";
-import { getImportantDates } from "@/lib/queries/important-dates";
+import {
+  getImportantDatesForView,
+  type ImportantDatesView,
+} from "@/lib/queries/important-dates";
 
 function formatDateLabel(date: string) {
   const asDate = new Date(`${date}T00:00:00`);
@@ -15,8 +18,34 @@ function formatDateLabel(date: string) {
   }).format(asDate);
 }
 
-export default async function Page() {
-  const dates = await getImportantDates();
+// normalizeView whitelists onnly the four allowed values; anything else falls back to "upcoming" (the default view)
+function normalizeView(value: string | undefined): ImportantDatesView {
+  if (value === "month") return "month";
+  if (value === "all") return "all";
+  if (value === "past") return "past";
+  return "upcoming";
+}
+
+// viewLabel returns a human-friendly label for the given view, used in the UI.
+function viewLabel(view: ImportantDatesView) {
+  if (view === "upcoming") return "Upcoming";
+  if (view === "month") return "This Month";
+  if (view === "past") return "Past";
+  return "All";
+}
+
+type DatesPageProps = {
+  searchParams: Promise<{ view?: string }>;
+};
+
+export default async function Page({ searchParams }: DatesPageProps) {
+  const { view } = await searchParams;
+  const selectedView = normalizeView(view);
+  const dates = await getImportantDatesForView(selectedView);
+  const emptyMessage =
+    selectedView === "all"
+      ? "No dates yet. Add one above."
+      : `No ${viewLabel(selectedView).toLowerCase()} dates yet. Add one above.`;
 
   return (
     <article>
@@ -31,6 +60,33 @@ export default async function Page() {
           Back to dashboard
         </Link>
       </header>
+
+      <nav aria-label="Date filters" className="flex flex-wrap gap-2 mb-6">
+        {(
+          [
+            ["upcoming", "Upcoming"],
+            ["month", "This Month"],
+            ["all", "All"],
+            ["past", "Past"],
+          ] as const
+        ).map(([key, label]) => {
+          const active = selectedView === key;
+          return (
+            <Link
+              key={key}
+              href={`/dashboard/dates?view=${key}`}
+              className={
+                active
+                  ? "rounded bg-black text-white px-3 py-1.5 text-sm font-medium"
+                  : "rounded bg-gray-200 text-black px-3 py-1.5 text-sm hover:bg-gray-300"
+              }
+              aria-current={active ? "page" : undefined}
+            >
+              {label}
+            </Link>
+          );
+        })}
+      </nav>
 
       <section className="bg-gray-100 p-4 rounded mb-6">
         <h2 className="text-lg text-black font-semibold mb-3">Add a date</h2>
@@ -87,9 +143,11 @@ export default async function Page() {
       </section>
 
       <section className="bg-gray-200 p-4 rounded text-black">
-        <h2 className="text-lg font-semibold mb-3">All dates</h2>
+        <h2 className="text-lg font-semibold mb-3">
+          {viewLabel(selectedView)} dates
+        </h2>
         {!dates || dates.length === 0 ? (
-          <p className="text-gray-600">No dates yet. Add one above.</p>
+          <p className="text-gray-600">{emptyMessage}</p>
         ) : (
           <ul className="grid gap-3">
             {dates.map((d) => (
@@ -101,7 +159,9 @@ export default async function Page() {
                       {formatDateLabel(d.date)}
                     </div>
                     {d.notes ? (
-                      <div className="text-sm text-gray-700 mt-1">{d.notes}</div>
+                      <div className="text-sm text-gray-700 mt-1">
+                        {d.notes}
+                      </div>
                     ) : null}
                   </div>
                   <form action={deleteImportantDate}>
