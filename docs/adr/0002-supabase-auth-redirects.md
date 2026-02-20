@@ -12,5 +12,4 @@ Standardise auth email links to land on `/auth/confirm` (and then redirect to an
 ## Notes
 
 - Supabase dashboard must allow the redirect URL(s) under “Auth → URL configuration”.
-- The app should validate the `next` path to prevent open redirects (only allow same-origin paths).
-
+- The app should validate the `next` path to prevent open redirects (allow relative paths and same-origin absolute URLs only).

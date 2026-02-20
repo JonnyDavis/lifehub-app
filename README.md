@@ -10,6 +10,18 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Local Supabase (recommended)
+
+This project uses a local Supabase stack for development (Docker required):
+
+```bash
+npx supabase start
+npx supabase status
+pnpm dev
+```
+
+See `docs/supabase-workflow.md` for the full workflow (local schema, seeds, pushing to prod).
+
 ## Docs
 
 Start here:

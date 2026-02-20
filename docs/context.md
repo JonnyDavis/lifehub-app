@@ -22,6 +22,7 @@ This repo is also intended as a portfolio project: keep patterns clean and easy 
 
 ### App (protected)
 
+- `/` – redirects to `/dashboard` if authenticated, otherwise `/auth/login` (supports `?next=/some/path`)
 - `/dashboard` – overview page (lists summary; dates are placeholder)
 - `/dashboard/lists` – lists index
 - `/dashboard/lists/[id]` – list detail + items
@@ -35,6 +36,13 @@ This repo is also intended as a portfolio project: keep patterns clean and easy 
 - Server-side auth reads/writes cookies via `@supabase/ssr` (`src/lib/supabase/server.ts`).
 - Lists + list items are stored in Supabase tables `lists` and `list_items`.
 - Current lists queries/actions use the Supabase client from `src/lib/supabase.ts`.
+
+## Local development (Supabase CLI)
+
+- Local Supabase runs via Docker + the Supabase CLI: `npx supabase start` (and `npx supabase status` for URLs/keys).
+- Point the app at local Supabase by setting `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` to the local values printed by the CLI.
+- Local schema is tracked in `supabase/migrations/` (commit these).
+- See `docs/supabase-workflow.md` for the full local-first → push-to-prod workflow.
 
 ## Environment variables (names only)
 
@@ -55,4 +63,3 @@ When you change any of these, update this file:
 - auth flows (signup confirm, reset password)
 - table shapes used by code
 - “what’s implemented vs planned”
-
