@@ -18,6 +18,39 @@ function formatDateLabel(date: string) {
   }).format(asDate);
 }
 
+function relativeDistanceLabel(dateISO: string) {
+  const [year, month, day] = dateISO.split("-").map(Number);
+  if (!year || !month || !day) return "";
+
+  const now = new Date();
+  const todayUtc = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  const targetUtc = Date.UTC(year, month - 1, day);
+  const diffDays = Math.round((targetUtc - todayUtc) / (24 * 60 * 60 * 1000));
+
+  if (diffDays === 0) return "Today";
+
+  const absDays = Math.abs(diffDays);
+  const prefix = diffDays > 0 ? "in " : "";
+  const suffix = diffDays < 0 ? " ago" : "";
+
+  if (absDays < 14) {
+    return `${prefix}${absDays} day${absDays === 1 ? "" : "s"}${suffix}`;
+  }
+
+  if (absDays < 60) {
+    const weeks = Math.round(absDays / 7);
+    return `${prefix}${weeks} week${weeks === 1 ? "" : "s"}${suffix}`;
+  }
+
+  const months = Math.round(absDays / 30);
+  if (months < 18) {
+    return `${prefix}${months} month${months === 1 ? "" : "s"}${suffix}`;
+  }
+
+  const years = Math.round(months / 12);
+  return `${prefix}${years} year${years === 1 ? "" : "s"}${suffix}`;
+}
+
 // normalizeView whitelists onnly the four allowed values; anything else falls back to "upcoming" (the default view)
 function normalizeView(value: string | undefined): ImportantDatesView {
   if (value === "month") return "month";
@@ -43,9 +76,7 @@ export default async function Page({ searchParams }: DatesPageProps) {
   const selectedView = normalizeView(view);
   const dates = await getImportantDatesForView(selectedView);
   const emptyMessage =
-    selectedView === "all"
-      ? "No dates yet. Add one above."
-      : `No ${viewLabel(selectedView).toLowerCase()} dates yet. Add one above.`;
+    selectedView === "all" ? "No dates yet. Add one above." : `No dates found.`;
 
   return (
     <article>
@@ -144,7 +175,7 @@ export default async function Page({ searchParams }: DatesPageProps) {
 
       <section className="bg-gray-200 p-4 rounded text-black">
         <h2 className="text-lg font-semibold mb-3">
-          {viewLabel(selectedView)} dates
+          {viewLabel(selectedView)}
         </h2>
         {!dates || dates.length === 0 ? (
           <p className="text-gray-600">{emptyMessage}</p>
@@ -157,6 +188,9 @@ export default async function Page({ searchParams }: DatesPageProps) {
                     <div className="font-medium truncate">{d.title}</div>
                     <div className="text-sm text-gray-700">
                       {formatDateLabel(d.date)}
+                    </div>
+                    <div className="text-sm text-gray-700 mt-1">
+                      🕒 {relativeDistanceLabel(d.date)}
                     </div>
                     {d.notes ? (
                       <div className="text-sm text-gray-700 mt-1">
