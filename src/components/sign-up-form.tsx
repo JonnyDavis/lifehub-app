@@ -17,16 +17,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 
+type SignUpFormProps = React.ComponentPropsWithoutRef<"div"> & {
+  next?: string | null;
+};
+
 export function SignUpForm({
+  next,
   className,
   ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+}: SignUpFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const nextQuery = next ? `?next=${encodeURIComponent(next)}` : "";
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,15 +47,20 @@ export function SignUpForm({
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const emailRedirectTo = `${window.location.origin}${next ?? "/dashboard"}`;
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/confirm?next=/dashboard`,
+          emailRedirectTo,
         },
       });
       if (error) throw error;
-      router.push("/auth/sign-up-success");
+      if (data.session) {
+        router.push(next ?? "/dashboard");
+      } else {
+        router.push(`/auth/sign-up-success${nextQuery}`);
+      }
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
@@ -109,7 +120,10 @@ export function SignUpForm({
             </div>
             <div className="mt-4 text-center text-sm">
               Already have an account?{" "}
-              <Link href="/auth/login" className="underline underline-offset-4">
+              <Link
+                href={`/auth/login${nextQuery}`}
+                className="underline underline-offset-4"
+              >
                 Login
               </Link>
             </div>
