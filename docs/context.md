@@ -16,9 +16,11 @@ This repo is also intended as a portfolio project: keep patterns clean and easy 
 - `/auth/sign-up` – email/password sign up UI
 - `/auth/sign-up-success` – shown after sign up when email confirmation is required
 - `/auth/forgot-password` – request reset email
-- `/auth/update-password` – set new password (requires active reset session)
+- `/auth/update-password` – set new password (requires active reset session; redirects to login if not authenticated)
 - `/auth/confirm` – GET route handler that verifies Supabase OTP
 - `/auth/error` – simple error page
+
+When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`): `/auth/login`, `/auth/sign-up`, `/auth/forgot-password`, `/auth/sign-up-success`.
 
 ### App (protected)
 

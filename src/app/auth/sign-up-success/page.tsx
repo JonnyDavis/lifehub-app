@@ -6,8 +6,10 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
 import { getNextFromSearchParams, type SearchParamsInput } from '@/lib/routing/get-next-from-search-params'
+import { createClient } from '@/lib/supabase/server'
 
 export default async function Page({
   searchParams,
@@ -15,6 +17,13 @@ export default async function Page({
   searchParams?: SearchParamsInput
 }) {
   const next = await getNextFromSearchParams(searchParams)
+
+  const supabase = await createClient()
+  const { data, error } = await supabase.auth.getClaims()
+  if (!error && data?.claims) {
+    redirect(next ?? '/dashboard')
+  }
+
   const loginHref = next ? `/auth/login?next=${encodeURIComponent(next)}` : '/auth/login'
 
   return (
