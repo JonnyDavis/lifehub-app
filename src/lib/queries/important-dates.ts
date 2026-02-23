@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import type { ImportantDate, UpcomingImportantDate } from "@/types/important-dates";
 
 export type ImportantDatesView = "upcoming" | "month" | "all" | "past";
 
@@ -33,7 +34,7 @@ export async function getImportantDates() {
     throw error;
   }
 
-  return dates ?? [];
+  return (dates ?? []) as ImportantDate[];
 }
 
 // This is a simplified version of getImportantDates that only returns the next few upcoming dates, which is used on the dashboard.
@@ -51,7 +52,7 @@ export async function getUpcomingImportantDates(limit = 4) {
     throw error;
   }
 
-  return dates ?? [];
+  return (dates ?? []) as UpcomingImportantDate[];
 }
 
 // This function is more complex because it needs to support multiple views with different filtering and sorting logic.
@@ -90,5 +91,5 @@ export async function getImportantDatesForView(view: ImportantDatesView) {
     throw error;
   }
 
-  return dates ?? [];
+  return (dates ?? []) as ImportantDate[];
 }

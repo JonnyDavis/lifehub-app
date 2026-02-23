@@ -5,21 +5,14 @@ import {
   deleteImportantDate,
 } from "@/lib/actions/important-dates";
 import {
+  importantDateCategoryBadgeClass,
+  importantDateCategoryLabel,
+  normalizeImportantDateCategory,
+} from "@/lib/important-dates/category";
+import {
   getImportantDatesForView,
   type ImportantDatesView,
 } from "@/lib/queries/important-dates";
-
-const IMPORTANT_DATE_CATEGORIES = [
-  "deadline",
-  "renewal",
-  "event",
-  "anniversary",
-  "appointment",
-  "birthday",
-  "other",
-] as const;
-
-type ImportantDateCategory = (typeof IMPORTANT_DATE_CATEGORIES)[number];
 
 function formatDateLabel(date: string) {
   const asDate = new Date(`${date}T00:00:00`);
@@ -61,35 +54,6 @@ function relativeDistanceLabel(dateISO: string) {
 
   const years = Math.round(months / 12);
   return `${prefix}${years} year${years === 1 ? "" : "s"}${suffix}`;
-}
-
-function normalizeCategory(value: unknown): ImportantDateCategory {
-  if (typeof value !== "string") return "other";
-  const candidate = value.trim().toLowerCase();
-  if (IMPORTANT_DATE_CATEGORIES.includes(candidate as ImportantDateCategory)) {
-    return candidate as ImportantDateCategory;
-  }
-  return "other";
-}
-
-function categoryLabel(category: ImportantDateCategory) {
-  if (category === "deadline") return "Deadline";
-  if (category === "renewal") return "Renewal";
-  if (category === "event") return "Event";
-  if (category === "anniversary") return "Anniversary";
-  if (category === "appointment") return "Appointment";
-  if (category === "birthday") return "Birthday";
-  return "Other";
-}
-
-function categoryBadgeClass(category: ImportantDateCategory) {
-  if (category === "deadline") return "bg-red-200 text-red-900";
-  if (category === "renewal") return "bg-amber-200 text-amber-900";
-  if (category === "event") return "bg-blue-200 text-blue-900";
-  if (category === "anniversary") return "bg-purple-200 text-purple-900";
-  if (category === "appointment") return "bg-green-200 text-green-900";
-  if (category === "birthday") return "bg-pink-200 text-pink-900";
-  return "bg-gray-200 text-gray-900";
 }
 
 // normalizeView whitelists onnly the four allowed values; anything else falls back to "upcoming" (the default view)
@@ -242,46 +206,47 @@ export default async function Page({ searchParams }: DatesPageProps) {
           <p className="text-gray-600">{emptyMessage}</p>
         ) : (
           <ul className="grid gap-3">
-            {dates.map((d) => (
-              <li key={d.id} className="bg-gray-300 p-3 rounded">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="font-medium truncate">{d.title}</div>
-                      <span
-                        className={`text-xs px-2 py-0.5 rounded whitespace-nowrap ${categoryBadgeClass(
-                          normalizeCategory((d as { category?: unknown }).category),
-                        )}`}
-                      >
-                        {categoryLabel(
-                          normalizeCategory((d as { category?: unknown }).category),
-                        )}
-                      </span>
-                    </div>
-                    <div className="text-sm text-gray-700">
-                      {formatDateLabel(d.date)}
-                    </div>
-                    <div className="text-sm text-gray-700 mt-1">
-                      🕒 {relativeDistanceLabel(d.date)}
-                    </div>
-                    {d.notes ? (
-                      <div className="text-sm text-gray-700 mt-1">
-                        {d.notes}
+            {dates.map((d) => {
+              const category = normalizeImportantDateCategory(d.category);
+              return (
+                <li key={d.id} className="bg-gray-300 p-3 rounded">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="font-medium truncate">{d.title}</div>
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded whitespace-nowrap ${importantDateCategoryBadgeClass(
+                            category,
+                          )}`}
+                        >
+                          {importantDateCategoryLabel(category)}
+                        </span>
                       </div>
-                    ) : null}
+                      <div className="text-sm text-gray-700">
+                        {formatDateLabel(d.date)}
+                      </div>
+                      <div className="text-sm text-gray-700 mt-1">
+                        🕒 {relativeDistanceLabel(d.date)}
+                      </div>
+                      {d.notes ? (
+                        <div className="text-sm text-gray-700 mt-1">
+                          {d.notes}
+                        </div>
+                      ) : null}
+                    </div>
+                    <form action={deleteImportantDate}>
+                      <input type="hidden" name="id" value={d.id} />
+                      <button
+                        type="submit"
+                        className="text-sm text-blue-600 hover:underline"
+                      >
+                        Delete
+                      </button>
+                    </form>
                   </div>
-                  <form action={deleteImportantDate}>
-                    <input type="hidden" name="id" value={d.id} />
-                    <button
-                      type="submit"
-                      className="text-sm text-blue-600 hover:underline"
-                    >
-                      Delete
-                    </button>
-                  </form>
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
