@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { normalizeListCategory } from "@/lib/presenters/lists";
 
 export async function createList(formData: FormData) {
   const supabase = await createClient();
@@ -16,10 +17,7 @@ export async function createList(formData: FormData) {
   }
 
   const cleanTitle = title.trim();
-  const cleanCategory =
-    typeof category === "string" && category.trim().length > 0
-      ? category.trim()
-      : null;
+  const cleanCategory = normalizeListCategory(category);
 
   const { error } = await supabase.from("lists").insert({
     title: cleanTitle,

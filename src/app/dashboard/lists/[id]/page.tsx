@@ -4,9 +4,12 @@ import Link from "next/link";
 import ListItemsSection from "@/app/dashboard/lists/_components/ListItemsSection";
 import { requireListById, getListItems } from "@/lib/queries/lists";
 import { AddListItemForm } from "@/app/dashboard/lists/_components/AddListItemForm";
-import { listAvatarText, splitListItemsByDone } from "@/lib/presenters/lists";
+import {
+  listAvatarText,
+  normalizeListCategory,
+  splitListItemsByDone,
+} from "@/lib/presenters/lists";
 import { ListCategoryBadge } from "@/components/list-category-badge";
-import { LIST_CATEGORIES, type ListCategory } from "@/types/lists";
 
 type ListPageProps = {
   params: Promise<{ id: string }>;
@@ -41,10 +44,10 @@ export default async function Page({ params }: ListPageProps) {
               <h2 className="text-lg font-semibold mb-2 truncate">
                 {list.title}
               </h2>
-              {typeof list.category === "string" &&
-              LIST_CATEGORIES.includes(list.category as ListCategory) ? (
-                <ListCategoryBadge category={list.category as ListCategory} />
-              ) : null}
+              {(() => {
+                const category = normalizeListCategory(list.category);
+                return category ? <ListCategoryBadge category={category} /> : null;
+              })()}
             </div>
           </div>
         </section>

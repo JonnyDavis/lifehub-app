@@ -1,7 +1,17 @@
+import { LIST_CATEGORIES } from "@/types/lists";
 import type { List, ListCategory, ListItem } from "@/types/lists";
 
 export function listAvatarText(list: Pick<List, "icon" | "title">) {
   return list.icon ?? list.title[0];
+}
+
+export function normalizeListCategory(value: unknown): ListCategory | null {
+  if (typeof value !== "string") return null;
+  const candidate = value.trim().toLowerCase();
+  if (LIST_CATEGORIES.includes(candidate as ListCategory)) {
+    return candidate as ListCategory;
+  }
+  return null;
 }
 
 export function listCategoryLabel(category: ListCategory) {

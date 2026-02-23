@@ -2,13 +2,12 @@
 
 import Link from "next/link";
 import { normalizeImportantDateCategory } from "@/lib/presenters/important-dates";
-import { listAvatarText } from "@/lib/presenters/lists";
+import { listAvatarText, normalizeListCategory } from "@/lib/presenters/lists";
 import { formatImportantDateLabel } from "@/lib/format/date";
 import { ImportantDateCategoryBadge } from "@/components/important-date-category-badge";
 import { ListCategoryBadge } from "@/components/list-category-badge";
 import { getLists } from "@/lib/queries/lists";
 import { getUpcomingImportantDates } from "@/lib/queries/important-dates";
-import { LIST_CATEGORIES, type ListCategory } from "@/types/lists";
 
 export default async function Page() {
   const lists = await getLists();
@@ -73,12 +72,12 @@ export default async function Page() {
                         <h2 className="text-lg font-semibold mb-2 truncate">
                           {list.title}
                         </h2>
-                        {typeof list.category === "string" &&
-                        LIST_CATEGORIES.includes(list.category as ListCategory) ? (
-                          <ListCategoryBadge
-                            category={list.category as ListCategory}
-                          />
-                        ) : null}
+                        {(() => {
+                          const category = normalizeListCategory(list.category);
+                          return category ? (
+                            <ListCategoryBadge category={category} />
+                          ) : null;
+                        })()}
                       </div>
                     </div>
                   </Link>
