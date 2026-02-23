@@ -7,11 +7,11 @@ import {
 import {
   importantDateCategoryLabel,
   normalizeImportantDateCategory,
-} from "@/lib/important-dates/category";
+} from "@/lib/presenters/important-dates";
 import {
   formatImportantDateLabel,
   relativeImportantDateDistanceLabel,
-} from "@/lib/important-dates/format";
+} from "@/lib/format/date";
 import { ImportantDateCategoryBadge } from "@/components/important-date-category-badge";
 import {
   getImportantDatesForView,

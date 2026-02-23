@@ -1,10 +1,8 @@
 // Home page for the dashboard section of the application
 
 import Link from "next/link";
-import {
-  normalizeImportantDateCategory,
-} from "@/lib/important-dates/category";
-import { formatImportantDateLabel } from "@/lib/important-dates/format";
+import { normalizeImportantDateCategory } from "@/lib/presenters/important-dates";
+import { formatImportantDateLabel } from "@/lib/format/date";
 import { ImportantDateCategoryBadge } from "@/components/important-date-category-badge";
 import { getLists } from "@/lib/queries/lists";
 import { getUpcomingImportantDates } from "@/lib/queries/important-dates";

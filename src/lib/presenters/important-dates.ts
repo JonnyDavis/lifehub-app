@@ -35,4 +35,3 @@ export function importantDateCategoryBadgeClass(
   if (category === "birthday") return "bg-pink-200 text-pink-900";
   return "bg-gray-200 text-gray-900";
 }
-

@@ -1,7 +1,7 @@
 import {
   importantDateCategoryBadgeClass,
   importantDateCategoryLabel,
-} from "@/lib/important-dates/category";
+} from "@/lib/presenters/important-dates";
 import type { ImportantDateCategory } from "@/types/important-dates";
 
 export function ImportantDateCategoryBadge({
@@ -19,4 +19,3 @@ export function ImportantDateCategoryBadge({
     </span>
   );
 }
-

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
-import { normalizeImportantDateCategory } from "@/lib/important-dates/category";
+import { normalizeImportantDateCategory } from "@/lib/presenters/important-dates";
 
 export async function createImportantDate(formData: FormData) {
   const supabase = await createClient();

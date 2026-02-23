@@ -39,4 +39,3 @@ export function relativeImportantDateDistanceLabel(dateISO: string) {
   const years = Math.round(months / 12);
   return `${prefix}${years} year${years === 1 ? "" : "s"}${suffix}`;
 }
-
