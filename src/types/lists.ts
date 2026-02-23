@@ -1,6 +1,15 @@
 // Type definitions for lists
 
-export const LIST_CATEGORIES = ["shopping", "tasks", "packing", "goals"] as const;
+export const LIST_CATEGORIES = [
+  "shopping",
+  "chores",
+  "errands",
+  "packing",
+  "maintenance",
+  "projects",
+  "wishlist",
+  "other",
+] as const;
 
 export type ListCategory = (typeof LIST_CATEGORIES)[number];
 

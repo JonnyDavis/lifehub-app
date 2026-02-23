@@ -16,16 +16,24 @@ export function normalizeListCategory(value: unknown): ListCategory | null {
 
 export function listCategoryLabel(category: ListCategory) {
   if (category === "shopping") return "Shopping";
-  if (category === "tasks") return "Tasks";
+  if (category === "chores") return "Chores";
+  if (category === "errands") return "Errands";
   if (category === "packing") return "Packing";
-  return "Goals";
+  if (category === "maintenance") return "Maintenance";
+  if (category === "projects") return "Projects";
+  if (category === "wishlist") return "Wishlist";
+  return "Other";
 }
 
 export function listCategoryBadgeClass(category: ListCategory) {
   if (category === "shopping") return "bg-green-200 text-green-900";
-  if (category === "tasks") return "bg-blue-200 text-blue-900";
+  if (category === "chores") return "bg-blue-200 text-blue-900";
+  if (category === "errands") return "bg-indigo-200 text-indigo-900";
   if (category === "packing") return "bg-amber-200 text-amber-900";
-  return "bg-purple-200 text-purple-900";
+  if (category === "maintenance") return "bg-red-200 text-red-900";
+  if (category === "projects") return "bg-purple-200 text-purple-900";
+  if (category === "wishlist") return "bg-pink-200 text-pink-900";
+  return "bg-gray-200 text-gray-900";
 }
 
 export function splitListItemsByDone(items: ListItem[]) {
