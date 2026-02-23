@@ -4,11 +4,12 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { normalizeListCategory } from "@/lib/presenters/lists";
 
 export async function createList(formData: FormData) {
   const supabase = await createClient();
   const title = formData.get("title");
-  const type = formData.get("type");
+  const category = formData.get("category");
 
   if (!title || typeof title !== "string" || title.trim().length === 0) {
     // TODO - handle this error properly in the UI
@@ -16,12 +17,11 @@ export async function createList(formData: FormData) {
   }
 
   const cleanTitle = title.trim();
-  const cleanType =
-    typeof type === "string" && type.trim().length > 0 ? type.trim() : null;
+  const cleanCategory = normalizeListCategory(category) ?? "other";
 
   const { error } = await supabase.from("lists").insert({
     title: cleanTitle,
-    type: cleanType,
+    category: cleanCategory,
     // missing icon for now
   });
 
