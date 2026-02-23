@@ -29,7 +29,7 @@ When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`):
 - `/dashboard` – overview page (lists summary; upcoming dates)
 - `/dashboard/lists` – lists index
 - `/dashboard/lists/[id]` – list detail + items
-- `/dashboard/dates` – important dates (add + view + delete)
+- `/dashboard/dates` – important dates (add + view + edit + delete)
 
 `/dashboard/*` is protected in `src/app/dashboard/layout.tsx` via `supabase.auth.getClaims()`.
 

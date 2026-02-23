@@ -12,11 +12,11 @@ import {
 // NOTE: View helpers live in src/types/important-dates.ts to keep query + UI in sync.
 
 type DatesPageProps = {
-  searchParams: Promise<{ view?: string }>;
+  searchParams: Promise<{ view?: string; edit?: string }>;
 };
 
 export default async function Page({ searchParams }: DatesPageProps) {
-  const { view } = await searchParams;
+  const { view, edit } = await searchParams;
   const selectedView = normalizeImportantDatesView(view);
   const dates = await getImportantDatesForView(selectedView);
   const emptyMessage =
@@ -29,6 +29,8 @@ export default async function Page({ searchParams }: DatesPageProps) {
       <AddImportantDateForm />
       <ImportantDatesList
         dates={dates}
+        selectedView={selectedView}
+        editingId={typeof edit === "string" ? edit : undefined}
         title={importantDatesViewLabel(selectedView)}
         emptyMessage={emptyMessage}
       />
