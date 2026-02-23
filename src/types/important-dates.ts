@@ -20,3 +20,28 @@ export type ImportantDate = {
 };
 
 export type UpcomingImportantDate = Omit<ImportantDate, "created_at">;
+
+export const IMPORTANT_DATES_VIEWS = [
+  "upcoming",
+  "month",
+  "all",
+  "past",
+] as const;
+
+export type ImportantDatesView = (typeof IMPORTANT_DATES_VIEWS)[number];
+
+export function normalizeImportantDatesView(
+  value: unknown,
+): ImportantDatesView {
+  if (value === "month") return "month";
+  if (value === "all") return "all";
+  if (value === "past") return "past";
+  return "upcoming";
+}
+
+export function importantDatesViewLabel(view: ImportantDatesView) {
+  if (view === "upcoming") return "Upcoming";
+  if (view === "month") return "This Month";
+  if (view === "past") return "Past";
+  return "All";
+}

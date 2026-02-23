@@ -1,7 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
-import type { ImportantDate, UpcomingImportantDate } from "@/types/important-dates";
+import type {
+  ImportantDate,
+  ImportantDatesView,
+  UpcomingImportantDate,
+} from "@/types/important-dates";
 
-export type ImportantDatesView = "upcoming" | "month" | "all" | "past";
+export type { ImportantDatesView } from "@/types/important-dates";
 
 function toISODateLocal(date: Date) {
   const year = date.getFullYear();

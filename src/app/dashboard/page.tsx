@@ -2,21 +2,12 @@
 
 import Link from "next/link";
 import {
-  importantDateCategoryBadgeClass,
-  importantDateCategoryLabel,
   normalizeImportantDateCategory,
 } from "@/lib/important-dates/category";
+import { formatImportantDateLabel } from "@/lib/important-dates/format";
+import { ImportantDateCategoryBadge } from "@/components/important-date-category-badge";
 import { getLists } from "@/lib/queries/lists";
 import { getUpcomingImportantDates } from "@/lib/queries/important-dates";
-
-function formatDateLabel(date: string) {
-  const asDate = new Date(`${date}T00:00:00`);
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(asDate);
-}
 
 export default async function Page() {
   const lists = await getLists();
@@ -117,16 +108,10 @@ export default async function Page() {
                     <div className="flex items-center justify-between gap-3">
                       <span className="flex items-center gap-2 min-w-0">
                         <span className="min-w-0 truncate">{d.title}</span>
-                        <span
-                          className={`text-xs px-2 py-0.5 rounded whitespace-nowrap ${importantDateCategoryBadgeClass(
-                            category,
-                          )}`}
-                        >
-                          {importantDateCategoryLabel(category)}
-                        </span>
+                        <ImportantDateCategoryBadge category={category} />
                       </span>
                       <span className="text-sm text-gray-700 whitespace-nowrap">
-                        {formatDateLabel(d.date)}
+                        {formatImportantDateLabel(d.date)}
                       </span>
                     </div>
                   </li>
