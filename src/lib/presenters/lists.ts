@@ -1,8 +1,9 @@
-import { LIST_CATEGORIES } from "@/types/lists";
-import type { List, ListCategory, ListItem } from "@/types/lists";
+import { LIST_CATEGORIES, LIST_ICON_KEYS } from "@/types/lists";
+import type { ListCategory, ListIconKey } from "@/types/lists";
+import type { List, ListItem } from "@/types/lists";
 
-export function listAvatarText(list: Pick<List, "icon" | "title">) {
-  return list.icon ?? list.title[0];
+export function listAvatarText(list: Pick<List, "title">) {
+  return list.title[0];
 }
 
 export function normalizeListCategory(value: unknown): ListCategory | null {
@@ -12,6 +13,28 @@ export function normalizeListCategory(value: unknown): ListCategory | null {
     return candidate as ListCategory;
   }
   return null;
+}
+
+export function normalizeListIconKey(value: unknown): ListIconKey | null {
+  if (typeof value !== "string") return null;
+
+  const trimmed = value.trim();
+  const candidate = trimmed.toLowerCase();
+  if (LIST_ICON_KEYS.includes(candidate as ListIconKey)) {
+    return candidate as ListIconKey;
+  }
+  return null;
+}
+
+export function defaultListIconKey(category: ListCategory): ListIconKey {
+  if (category === "shopping") return "shopping-cart";
+  if (category === "chores") return "list-checks";
+  if (category === "errands") return "map-pin";
+  if (category === "packing") return "backpack";
+  if (category === "maintenance") return "wrench";
+  if (category === "projects") return "folder-kanban";
+  if (category === "wishlist") return "heart";
+  return "tag";
 }
 
 export function listCategoryLabel(category: ListCategory) {

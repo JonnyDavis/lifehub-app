@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { getLists } from "@/lib/queries/lists";
-import { listAvatarText, normalizeListCategory } from "@/lib/presenters/lists";
 import { CreateListForm } from "@/app/dashboard/lists/_components/CreateListForm";
 import { ListCategoryBadge } from "@/components/list-category-badge";
+import { ListAvatar } from "@/components/list-avatar";
+import { normalizeListCategory } from "@/lib/presenters/lists";
 
 export default async function Page() {
   const lists = await getLists();
@@ -27,9 +28,7 @@ export default async function Page() {
               href={`/dashboard/lists/${list.id}`}
               className="flex gap-4 bg-gray-200 p-4 rounded text-black"
             >
-              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                {listAvatarText(list)}
-              </div>
+              <ListAvatar list={list} />
               <div className="min-w-0">
                 <div className="flex items-center gap-2 min-w-0">
                   <h2 className="text-lg font-semibold mb-2 truncate">

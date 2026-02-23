@@ -32,11 +32,8 @@ export function CreateListForm() {
             id="category"
             name="category"
             className="rounded border border-gray-300 px-3 py-2 text-sm text-black"
-            defaultValue=""
+            defaultValue="other"
           >
-            <option value="" disabled>
-              Select category (optional)
-            </option>
             {LIST_CATEGORIES.map((category) => (
               <option key={category} value={category}>
                 {listCategoryLabel(category)}

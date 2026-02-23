@@ -17,7 +17,7 @@ export async function createList(formData: FormData) {
   }
 
   const cleanTitle = title.trim();
-  const cleanCategory = normalizeListCategory(category);
+  const cleanCategory = normalizeListCategory(category) ?? "other";
 
   const { error } = await supabase.from("lists").insert({
     title: cleanTitle,

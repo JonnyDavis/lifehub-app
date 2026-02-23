@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { normalizeImportantDateCategory } from "@/lib/presenters/important-dates";
-import { listAvatarText, normalizeListCategory } from "@/lib/presenters/lists";
+import { normalizeListCategory } from "@/lib/presenters/lists";
 import { formatImportantDateLabel } from "@/lib/format/date";
 import { ImportantDateCategoryBadge } from "@/components/important-date-category-badge";
 import { ListCategoryBadge } from "@/components/list-category-badge";
+import { ListAvatar } from "@/components/list-avatar";
 import { getLists } from "@/lib/queries/lists";
 import { getUpcomingImportantDates } from "@/lib/queries/important-dates";
 
@@ -64,9 +65,7 @@ export default async function Page() {
                     href={`/dashboard/lists/${list.id}`}
                     className="flex gap-4 bg-gray-200 p-4 rounded text-black"
                   >
-                    <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                      {listAvatarText(list)}
-                    </div>
+                    <ListAvatar list={list} />
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 min-w-0">
                         <h2 className="text-lg font-semibold mb-2 truncate">
