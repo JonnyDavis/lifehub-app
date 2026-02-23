@@ -26,9 +26,10 @@ When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`):
 
 - `/` – redirects to `/dashboard` if authenticated, otherwise `/auth/login` (supports `?next=/some/path`)
 - `/dashboard` – overview page (lists summary; dates are placeholder)
+- `/dashboard` – overview page (lists summary; upcoming dates)
 - `/dashboard/lists` – lists index
 - `/dashboard/lists/[id]` – list detail + items
-- `/dashboard/dates` – placeholder folder (feature not implemented yet)
+- `/dashboard/dates` – important dates (add + view + edit + delete)
 
 `/dashboard/*` is protected in `src/app/dashboard/layout.tsx` via `supabase.auth.getClaims()`.
 
@@ -45,6 +46,7 @@ When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`):
 - Supabase Auth powers sessions.
 - Server-side auth reads/writes cookies via `@supabase/ssr` (`src/lib/supabase/server.ts`).
 - Lists + list items are stored in Supabase tables `lists` and `list_items`.
+- Important dates are stored in Supabase table `important_dates`.
 - Current lists queries/actions use the Supabase server client from `src/lib/supabase/server.ts`.
 
 ## Local development (Supabase CLI)
@@ -62,7 +64,7 @@ When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`):
 ## Known gaps / TODOs (important)
 
 - “Households” scoping is described in `docs/data-model.md` but is **not implemented** in code yet.
-- “Important dates” UI on the dashboard is currently hard-coded placeholder content.
+- “Important dates” are not household-scoped yet.
 - Validation is mostly manual (no Zod yet), and error handling is minimal in server actions.
 - No automated tests yet.
 
