@@ -48,6 +48,7 @@ When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`):
 - Lists + list items are stored in Supabase tables `lists` and `list_items`.
 - Important dates are stored in Supabase table `important_dates`.
 - Current lists queries/actions use the Supabase server client from `src/lib/supabase/server.ts`.
+  - `lists` includes an optional `category` column (used for list “type”/category).
 
 ## Local development (Supabase CLI)
 

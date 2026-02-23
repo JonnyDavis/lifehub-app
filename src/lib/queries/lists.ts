@@ -7,7 +7,7 @@ export async function getLists() {
   const supabase = await createClient();
   const { data: lists, error } = await supabase
     .from("lists")
-    .select("id, title, icon, type")
+    .select("id, title, icon, category")
     .order("created_at", { ascending: true });
 
   if (error) {
@@ -22,7 +22,7 @@ export async function getListById(id: string) {
   const supabase = await createClient();
   const { data: list, error: error } = await supabase
     .from("lists")
-    .select("id, title, icon, type")
+    .select("id, title, icon, category")
     .eq("id", id)
     .maybeSingle();
 

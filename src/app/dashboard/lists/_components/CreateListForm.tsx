@@ -1,4 +1,6 @@
 import { createList } from "@/lib/actions/lists";
+import { listCategoryLabel } from "@/lib/presenters/lists";
+import { LIST_CATEGORIES } from "@/types/lists";
 
 export function CreateListForm() {
   return (
@@ -23,22 +25,23 @@ export function CreateListForm() {
         </div>
 
         <div>
-          <label htmlFor="type" className="sr-only">
-            List type
+          <label htmlFor="category" className="sr-only">
+            Category
           </label>
           <select
-            id="type"
-            name="type"
+            id="category"
+            name="category"
             className="rounded border border-gray-300 px-3 py-2 text-sm text-black"
             defaultValue=""
           >
             <option value="" disabled>
-              Select type (optional)
+              Select category (optional)
             </option>
-            <option value="shopping">Shopping</option>
-            <option value="tasks">Tasks</option>
-            <option value="packing">Packing</option>
-            <option value="goals">Goals</option>
+            {LIST_CATEGORIES.map((category) => (
+              <option key={category} value={category}>
+                {listCategoryLabel(category)}
+              </option>
+            ))}
           </select>
         </div>
 

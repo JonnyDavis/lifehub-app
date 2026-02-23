@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 export async function createList(formData: FormData) {
   const supabase = await createClient();
   const title = formData.get("title");
-  const type = formData.get("type");
+  const category = formData.get("category");
 
   if (!title || typeof title !== "string" || title.trim().length === 0) {
     // TODO - handle this error properly in the UI
@@ -16,12 +16,14 @@ export async function createList(formData: FormData) {
   }
 
   const cleanTitle = title.trim();
-  const cleanType =
-    typeof type === "string" && type.trim().length > 0 ? type.trim() : null;
+  const cleanCategory =
+    typeof category === "string" && category.trim().length > 0
+      ? category.trim()
+      : null;
 
   const { error } = await supabase.from("lists").insert({
     title: cleanTitle,
-    type: cleanType,
+    category: cleanCategory,
     // missing icon for now
   });
 

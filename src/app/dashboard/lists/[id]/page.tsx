@@ -5,6 +5,8 @@ import ListItemsSection from "@/app/dashboard/lists/_components/ListItemsSection
 import { requireListById, getListItems } from "@/lib/queries/lists";
 import { AddListItemForm } from "@/app/dashboard/lists/_components/AddListItemForm";
 import { listAvatarText, splitListItemsByDone } from "@/lib/presenters/lists";
+import { ListCategoryBadge } from "@/components/list-category-badge";
+import { LIST_CATEGORIES, type ListCategory } from "@/types/lists";
 
 type ListPageProps = {
   params: Promise<{ id: string }>;
@@ -34,7 +36,17 @@ export default async function Page({ params }: ListPageProps) {
           <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
             {listAvatarText(list)}
           </div>
-          <h2 className="text-lg font-semibold mb-2">{list.title}</h2>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <h2 className="text-lg font-semibold mb-2 truncate">
+                {list.title}
+              </h2>
+              {typeof list.category === "string" &&
+              LIST_CATEGORIES.includes(list.category as ListCategory) ? (
+                <ListCategoryBadge category={list.category as ListCategory} />
+              ) : null}
+            </div>
+          </div>
         </section>
         <hr className="my-4" />
 

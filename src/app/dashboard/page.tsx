@@ -5,8 +5,10 @@ import { normalizeImportantDateCategory } from "@/lib/presenters/important-dates
 import { listAvatarText } from "@/lib/presenters/lists";
 import { formatImportantDateLabel } from "@/lib/format/date";
 import { ImportantDateCategoryBadge } from "@/components/important-date-category-badge";
+import { ListCategoryBadge } from "@/components/list-category-badge";
 import { getLists } from "@/lib/queries/lists";
 import { getUpcomingImportantDates } from "@/lib/queries/important-dates";
+import { LIST_CATEGORIES, type ListCategory } from "@/types/lists";
 
 export default async function Page() {
   const lists = await getLists();
@@ -66,7 +68,19 @@ export default async function Page() {
                     <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
                       {listAvatarText(list)}
                     </div>
-                    <h2 className="text-lg font-semibold mb-2">{list.title}</h2>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <h2 className="text-lg font-semibold mb-2 truncate">
+                          {list.title}
+                        </h2>
+                        {typeof list.category === "string" &&
+                        LIST_CATEGORIES.includes(list.category as ListCategory) ? (
+                          <ListCategoryBadge
+                            category={list.category as ListCategory}
+                          />
+                        ) : null}
+                      </div>
+                    </div>
                   </Link>
                 </li>
               ))}
