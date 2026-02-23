@@ -58,6 +58,15 @@ Local dev data is intentionally **not** committed.
 - `supabase/seed.sql` is git-ignored (see `supabase/.gitignore`).
 - The local stack can load `supabase/seed.sql` during `npx supabase db reset` (see `supabase/config.toml`).
 
+### Keep local data between `db reset`s
+
+If you want to keep the data you created in the **local** Docker database, dump local data into `supabase/seed.sql` before resetting:
+
+- Dump local data: `npx supabase db dump --local --data-only --schema public --file supabase/seed.sql`
+- Reset + re-seed: `npx supabase db reset`
+
+Note: `--linked` dumps data from the hosted (linked) Supabase project, not your local stack.
+
 ### One-time snapshot: copy hosted data into local
 
 If you want your local DB to have the same app data as the hosted project:
@@ -82,4 +91,3 @@ Note: hosted (prod) email templates are configured in the Supabase dashboard; lo
 
 - Emails not showing up: confirm `auth.email.enable_confirmations = true` in `supabase/config.toml` and check the Inbucket URL from `npx supabase status`.
 - Wrong environment: confirm `.env.local` points to the **local** API URL (not the hosted project URL).
-
