@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import type { List, ListItem } from "@/types/lists";
 
 export async function getLists() {
   const supabase = await createClient();
@@ -14,7 +15,7 @@ export async function getLists() {
     throw error;
   }
 
-  return lists ?? [];
+  return (lists ?? []) as List[];
 }
 
 export async function getListById(id: string) {
@@ -36,7 +37,7 @@ export async function getListById(id: string) {
     throw error;
   }
 
-  return list; // list | null
+  return (list ?? null) as List | null;
 }
 
 // Server only function to fetch list by ID and throw 404 if not found
@@ -59,5 +60,5 @@ export async function getListItems(listId: string) {
     throw error;
   }
 
-  return items ?? [];
+  return (items ?? []) as ListItem[];
 }

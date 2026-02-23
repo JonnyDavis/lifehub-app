@@ -1,15 +1,8 @@
-// Component for rendering a single item within a list, along with toggle and delete actions.
-
 import { ListItem } from "@/types/lists";
 import { deleteListItem } from "@/lib/actions/lists";
 import { ToggleItemCheckbox } from "@/app/dashboard/lists/ToggleItemCheckbox";
 
-type Props = {
-  item: ListItem;
-  listId: string;
-};
-
-export default function ListItemsRow({ item, listId }: Props) {
+function ListItemsRow({ item, listId }: { item: ListItem; listId: string }) {
   return (
     <li key={item.id} className="flex items-center gap-2 justify-between">
       {/* Left side: toggle form + label */}
@@ -40,5 +33,47 @@ export default function ListItemsRow({ item, listId }: Props) {
         </button>
       </form>
     </li>
+  );
+}
+
+function ListItems({ items, listId }: { items: ListItem[]; listId: string }) {
+  return (
+    <ul className="space-y-2">
+      {items.map((item) => (
+        <ListItemsRow key={item.id} item={item} listId={listId} />
+      ))}
+    </ul>
+  );
+}
+
+type Props = {
+  title?: string;
+  items: ListItem[];
+  listId: string;
+  emptyMessage?: string;
+  hideIfEmpty?: boolean;
+};
+
+export default function ListItemsSection({
+  title,
+  items,
+  listId,
+  emptyMessage,
+  hideIfEmpty,
+}: Props) {
+  if (hideIfEmpty && items.length === 0) return null;
+
+  return (
+    <section>
+      {title && <h3 className="text-md font-semibold mb-2">{title}</h3>}
+
+      {items.length === 0 ? (
+        emptyMessage ? (
+          <div className="text-gray-500">{emptyMessage}</div>
+        ) : null
+      ) : (
+        <ListItems items={items} listId={listId} />
+      )}
+    </section>
   );
 }
