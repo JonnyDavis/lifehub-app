@@ -4,6 +4,47 @@ import Link from "next/link";
 import { getLists } from "@/lib/queries/lists";
 import { getUpcomingImportantDates } from "@/lib/queries/important-dates";
 
+const IMPORTANT_DATE_CATEGORIES = [
+  "deadline",
+  "renewal",
+  "event",
+  "anniversary",
+  "appointment",
+  "birthday",
+  "other",
+] as const;
+
+type ImportantDateCategory = (typeof IMPORTANT_DATE_CATEGORIES)[number];
+
+function normalizeCategory(value: unknown): ImportantDateCategory {
+  if (typeof value !== "string") return "other";
+  const candidate = value.trim().toLowerCase();
+  if (IMPORTANT_DATE_CATEGORIES.includes(candidate as ImportantDateCategory)) {
+    return candidate as ImportantDateCategory;
+  }
+  return "other";
+}
+
+function categoryLabel(category: ImportantDateCategory) {
+  if (category === "deadline") return "Deadline";
+  if (category === "renewal") return "Renewal";
+  if (category === "event") return "Event";
+  if (category === "anniversary") return "Anniversary";
+  if (category === "appointment") return "Appointment";
+  if (category === "birthday") return "Birthday";
+  return "Other";
+}
+
+function categoryBadgeClass(category: ImportantDateCategory) {
+  if (category === "deadline") return "bg-red-200 text-red-900";
+  if (category === "renewal") return "bg-amber-200 text-amber-900";
+  if (category === "event") return "bg-blue-200 text-blue-900";
+  if (category === "anniversary") return "bg-purple-200 text-purple-900";
+  if (category === "appointment") return "bg-green-200 text-green-900";
+  if (category === "birthday") return "bg-pink-200 text-pink-900";
+  return "bg-gray-200 text-gray-900";
+}
+
 function formatDateLabel(date: string) {
   const asDate = new Date(`${date}T00:00:00`);
   return new Intl.DateTimeFormat("en-US", {
@@ -108,7 +149,18 @@ export default async function Page() {
               {upcomingDates.map((d) => (
                 <li key={d.id} className="bg-gray-300 p-3 rounded min-w-0">
                   <div className="flex items-center justify-between gap-3">
-                    <span className="min-w-0 truncate">{d.title}</span>
+                    <span className="flex items-center gap-2 min-w-0">
+                      <span className="min-w-0 truncate">{d.title}</span>
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded whitespace-nowrap ${categoryBadgeClass(
+                          normalizeCategory((d as { category?: unknown }).category),
+                        )}`}
+                      >
+                        {categoryLabel(
+                          normalizeCategory((d as { category?: unknown }).category),
+                        )}
+                      </span>
+                    </span>
                     <span className="text-sm text-gray-700 whitespace-nowrap">
                       {formatDateLabel(d.date)}
                     </span>
