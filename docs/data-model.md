@@ -30,6 +30,7 @@ Used fields:
 - `id` (uuid)
 - `title` (text)
 - `date` (date)
+- `category` (text)
 - `notes` (text, nullable)
 - `created_at` (timestamptz)
 
