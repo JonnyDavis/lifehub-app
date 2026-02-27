@@ -10,7 +10,7 @@ import {
 } from "@/lib/presenters/lists";
 import { ListCategoryBadge } from "@/components/list-category-badge";
 import { ListAvatar } from "@/components/list-avatar";
-import { EditListIcon } from "@/app/dashboard/lists/_components/EditListIcon";
+import { EditListForm } from "@/app/dashboard/lists/_components/EditListForm";
 
 type ListPageProps = {
   params: Promise<{ id: string }>;
@@ -36,7 +36,7 @@ export default async function Page({ params }: ListPageProps) {
         &larr; Back to Lists
       </Link>
       <article className="bg-gray-200 p-4 rounded text-black">
-        <section className="flex items-start justify-between gap-4">
+        <section className="flex items-start gap-4">
           <div className="flex gap-4 min-w-0">
             <ListAvatar list={list} />
             <div className="min-w-0">
@@ -53,9 +53,8 @@ export default async function Page({ params }: ListPageProps) {
               </div>
             </div>
           </div>
-
-          <EditListIcon listId={list.id} icon={list.icon} className="shrink-0" />
         </section>
+        <EditListForm list={list} />
         <hr className="my-4" />
 
         <AddListItemForm listId={list.id} />
