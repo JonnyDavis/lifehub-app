@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 import { normalizeListCategory } from "@/lib/presenters/lists";
+import { normalizeListIconKey } from "@/lib/presenters/lists";
 
 export async function createList(formData: FormData) {
   const supabase = await createClient();
@@ -132,5 +133,38 @@ export async function deleteListItem(formData: FormData) {
     return;
   }
 
+  revalidatePath(`/dashboard/lists/${listId}`);
+}
+
+export async function updateListIcon(formData: FormData) {
+  const supabase = await createClient();
+  const listId = formData.get("listId");
+  const icon = formData.get("icon");
+
+  if (!listId || typeof listId !== "string") {
+    console.error("Missing or invalid listId in updateListIcon");
+    return;
+  }
+
+  const nextIcon =
+    icon === "" ? null : icon === null ? null : normalizeListIconKey(icon);
+
+  // Guard to prevent prevent updating the DB just because input is invalid.
+  if (icon !== "" && icon !== null && nextIcon === null) {
+    return;
+  }
+
+  const { error } = await supabase
+    .from("lists")
+    .update({ icon: nextIcon })
+    .eq("id", listId);
+
+  if (error) {
+    console.error("Error updating list icon:", error);
+    return;
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/lists");
   revalidatePath(`/dashboard/lists/${listId}`);
 }
