@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { normalizeImportantDateCategory } from "@/lib/presenters/important-dates";
-import { normalizeListCategory } from "@/lib/presenters/lists";
+import { presentList } from "@/lib/presenters/lists";
 import { formatImportantDateLabel } from "@/lib/format/date";
 import { ImportantDateCategoryBadge } from "@/components/important-date-category-badge";
 import { ListCategoryBadge } from "@/components/list-category-badge";
@@ -12,6 +12,7 @@ import { getUpcomingImportantDates } from "@/lib/queries/important-dates";
 
 export default async function Page() {
   const lists = await getLists();
+  const listViews = lists.map(presentList);
   const upcomingDates = await getUpcomingImportantDates(4);
 
   return (
@@ -59,24 +60,21 @@ export default async function Page() {
             <p className="text-gray-500">No lists available</p>
           ) : (
             <ul className="grid sm:grid-cols-1 md:grid-cols-2 gap-4">
-              {lists.map((list) => (
+              {listViews.map((list) => (
                 <li key={list.id}>
                   <Link
                     href={`/dashboard/lists/${list.id}`}
                     className="flex gap-4 bg-gray-200 p-4 rounded text-black"
                   >
-                    <ListAvatar list={list} />
+                    <ListAvatar avatar={list.avatar} />
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 min-w-0">
                         <h2 className="text-lg font-semibold mb-2 truncate">
                           {list.title}
                         </h2>
-                        {(() => {
-                          const category = normalizeListCategory(list.category);
-                          return category ? (
-                            <ListCategoryBadge category={category} />
-                          ) : null;
-                        })()}
+                        {list.badgeCategory ? (
+                          <ListCategoryBadge category={list.badgeCategory} />
+                        ) : null}
                       </div>
                     </div>
                   </Link>
