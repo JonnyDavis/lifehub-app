@@ -10,6 +10,7 @@ import {
 } from "@/lib/presenters/lists";
 import { ListCategoryBadge } from "@/components/list-category-badge";
 import { ListAvatar } from "@/components/list-avatar";
+import { EditListIcon } from "@/app/dashboard/lists/_components/EditListIcon";
 
 type ListPageProps = {
   params: Promise<{ id: string }>;
@@ -47,6 +48,7 @@ export default async function Page({ params }: ListPageProps) {
                 return category ? <ListCategoryBadge category={category} /> : null;
               })()}
             </div>
+            <EditListIcon listId={list.id} icon={list.icon} />
           </div>
         </section>
         <hr className="my-4" />
