@@ -8,9 +8,13 @@ import {
   formatImportantDateLabel,
   relativeImportantDateDistanceLabel,
 } from "@/lib/format/date";
-import { normalizeImportantDateCategory } from "@/lib/presenters/important-dates";
+import { presentImportantDate } from "@/lib/presenters/important-dates";
 import { ImportantDateCategoryBadge } from "@/components/important-date-category-badge";
-import type { ImportantDate, ImportantDatesView } from "@/types/important-dates";
+import type {
+  ImportantDate,
+  ImportantDatesView,
+  ImportantDateView,
+} from "@/types/important-dates";
 import { IMPORTANT_DATE_CATEGORIES } from "@/types/important-dates";
 import { importantDateCategoryLabel } from "@/lib/presenters/important-dates";
 
@@ -18,10 +22,10 @@ function EditImportantDateCard({
   date,
   selectedView,
 }: {
-  date: ImportantDate;
+  date: ImportantDateView;
   selectedView: ImportantDatesView;
 }) {
-  const category = normalizeImportantDateCategory(date.category);
+  const category = date.category;
   const anchorId = `date-${date.id}`;
 
   return (
@@ -137,10 +141,10 @@ function ViewImportantDateCard({
   date,
   selectedView,
 }: {
-  date: ImportantDate;
+  date: ImportantDateView;
   selectedView: ImportantDatesView;
 }) {
-  const category = normalizeImportantDateCategory(date.category);
+  const category = date.category;
   const anchorId = `date-${date.id}`;
 
   return (
@@ -197,6 +201,8 @@ export function ImportantDatesList({
   title: string;
   emptyMessage: string;
 }) {
+  const dateViews = dates.map(presentImportantDate);
+
   return (
     <section className="bg-gray-200 p-4 rounded text-black">
       <h2 className="text-lg font-semibold mb-3">{title}</h2>
@@ -204,7 +210,7 @@ export function ImportantDatesList({
         <p className="text-gray-600">{emptyMessage}</p>
       ) : (
         <ul className="grid gap-3">
-          {dates.map((d) =>
+          {dateViews.map((d) =>
             editingId === d.id ? (
               <EditImportantDateCard
                 key={d.id}

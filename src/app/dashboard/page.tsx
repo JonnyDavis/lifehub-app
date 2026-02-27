@@ -1,7 +1,7 @@
 // Home page for the dashboard section of the application
 
 import Link from "next/link";
-import { normalizeImportantDateCategory } from "@/lib/presenters/important-dates";
+import { presentImportantDate } from "@/lib/presenters/important-dates";
 import { presentList } from "@/lib/presenters/lists";
 import { formatImportantDateLabel } from "@/lib/format/date";
 import { ImportantDateCategoryBadge } from "@/components/important-date-category-badge";
@@ -111,16 +111,19 @@ export default async function Page() {
           ) : (
             <ul className="grid gap-2">
               {upcomingDates.map((d) => {
-                const category = normalizeImportantDateCategory(d.category);
+                const dateView = presentImportantDate(d);
+                const category = dateView.category;
                 return (
                   <li key={d.id} className="bg-gray-300 p-3 rounded min-w-0">
                     <div className="flex items-center justify-between gap-3">
                       <span className="flex items-center gap-2 min-w-0">
-                        <span className="min-w-0 truncate">{d.title}</span>
+                        <span className="min-w-0 truncate">
+                          {dateView.title}
+                        </span>
                         <ImportantDateCategoryBadge category={category} />
                       </span>
                       <span className="text-sm text-gray-700 whitespace-nowrap">
-                        {formatImportantDateLabel(d.date)}
+                        {formatImportantDateLabel(dateView.date)}
                       </span>
                     </div>
                   </li>

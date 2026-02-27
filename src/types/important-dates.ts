@@ -21,6 +21,8 @@ export type ImportantDate = {
 
 export type UpcomingImportantDate = Omit<ImportantDate, "created_at">;
 
+export type ImportantDateView = Omit<ImportantDate, "created_at">;
+
 export const IMPORTANT_DATES_VIEWS = [
   "upcoming",
   "month",
