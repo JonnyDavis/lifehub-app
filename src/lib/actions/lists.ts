@@ -136,31 +136,44 @@ export async function deleteListItem(formData: FormData) {
   revalidatePath(`/dashboard/lists/${listId}`);
 }
 
-export async function updateListIcon(formData: FormData) {
+export async function updateList(formData: FormData) {
   const supabase = await createClient();
   const listId = formData.get("listId");
+  const title = formData.get("title");
+  const category = formData.get("category");
   const icon = formData.get("icon");
 
   if (!listId || typeof listId !== "string") {
-    console.error("Missing or invalid listId in updateListIcon");
+    console.error("Missing or invalid listId in updateList");
     return;
   }
 
-  const nextIcon =
-    icon === "" ? null : icon === null ? null : normalizeListIconKey(icon);
+  if (!title || typeof title !== "string" || title.trim().length === 0) {
+    return;
+  }
 
-  // Guard to prevent prevent updating the DB just because input is invalid.
+  const cleanTitle = title.trim();
+  const cleanCategory = normalizeListCategory(category) ?? "other";
+
+  const nextIcon =
+    icon === "" || icon === null ? null : normalizeListIconKey(icon);
+
+  // Guard to prevent updating the DB just because input is invalid.
   if (icon !== "" && icon !== null && nextIcon === null) {
     return;
   }
 
   const { error } = await supabase
     .from("lists")
-    .update({ icon: nextIcon })
+    .update({
+      title: cleanTitle,
+      category: cleanCategory,
+      icon: nextIcon,
+    })
     .eq("id", listId);
 
   if (error) {
-    console.error("Error updating list icon:", error);
+    console.error("Error updating list:", error);
     return;
   }
 
