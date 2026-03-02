@@ -1,9 +1,14 @@
 import { LIST_CATEGORIES, LIST_ICON_KEYS } from "@/types/lists";
 import type { ListCategory, ListIconKey } from "@/types/lists";
-import type { List, ListItem } from "@/types/lists";
+import type { List, ListAvatarView, ListItem, ListView } from "@/types/lists";
 
 export function listAvatarText(list: Pick<List, "title">) {
   return list.title[0];
+}
+
+function isReasonableIconText(value: string) {
+  const trimmed = value.trim();
+  return trimmed.length > 0 && trimmed.length <= 4;
 }
 
 export function normalizeListCategory(value: unknown): ListCategory | null {
@@ -35,6 +40,64 @@ export function defaultListIconKey(category: ListCategory): ListIconKey {
   if (category === "projects") return "folder-kanban";
   if (category === "wishlist") return "heart";
   return "tag";
+}
+
+/**
+ * Convert a DB-ish `List` shape (nullable/unknown strings) into a UI-friendly view model.
+ *
+ * Notes (especially if you're coming from vanilla JS):
+ * - `Pick<List, ...>` is just saying "this function only needs these fields".
+ * - `: ListView` is compile-time only: it forces the returned plain JS object to match
+ *   the `ListView` type (it does not exist at runtime).
+ * - The goal is to compute all normalization/defaulting once, so UI components can
+ *   simply read `listView.title`, `listView.badgeCategory`, `listView.avatar`, etc.
+ */
+export function presentList(
+  list: Pick<List, "id" | "title" | "category" | "icon">,
+): ListView {
+  // For display: only a valid/known category should show a badge or influence defaults.
+  const badgeCategory = normalizeListCategory(list.category);
+
+  // For editing: always provide a valid select value (falls back to "other").
+  const editorCategory = badgeCategory ?? "other";
+
+  // For both editing and avatar rendering: only accept known icon keys.
+  const editorIconKey = normalizeListIconKey(list.icon);
+
+  const avatar: ListAvatarView = (() => {
+    // Priority 1: known icon key (e.g. "shopping-cart").
+    if (editorIconKey) return { kind: "icon", icon: editorIconKey };
+
+    // Priority 2: short custom icon text stored in `lists.icon` (e.g. "WFH").
+    const customIconText =
+      typeof list.icon === "string" &&
+      isReasonableIconText(list.icon) &&
+      editorIconKey === null
+        ? list.icon.trim()
+        : null;
+
+    if (customIconText) return { kind: "text", text: customIconText };
+
+    // Priority 3: category-based default icon (only when category is valid).
+    const fallbackIconKey = badgeCategory
+      ? defaultListIconKey(badgeCategory)
+      : null;
+
+    if (fallbackIconKey) return { kind: "icon", icon: fallbackIconKey };
+
+    // Priority 4: final fallback is the first letter of the title.
+    return { kind: "text", text: listAvatarText(list) };
+  })();
+
+  return {
+    // This is a plain JS object at runtime; TypeScript checks its shape at build time.
+    id: list.id,
+    title: list.title,
+    badgeCategory,
+    editorCategory,
+    editorIconKey,
+    avatar,
+  };
 }
 
 export function listCategoryLabel(category: ListCategory) {

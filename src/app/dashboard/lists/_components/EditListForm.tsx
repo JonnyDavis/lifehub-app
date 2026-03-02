@@ -4,46 +4,46 @@ import { useState, useTransition } from "react";
 
 import { updateList } from "@/lib/actions/lists";
 import { LIST_CATEGORIES, LIST_ICON_KEYS } from "@/types/lists";
-import type { ListIconKey } from "@/types/lists";
-import {
-  listCategoryLabel,
-  normalizeListCategory,
-  normalizeListIconKey,
-} from "@/lib/presenters/lists";
+import type { ListCategory, ListIconKey, ListView } from "@/types/lists";
+import { listCategoryLabel } from "@/lib/presenters/lists";
 import { ListIcon } from "@/components/list-icon";
 
 export function EditListForm({
   list,
 }: {
-  list: {
-    id: string;
-    title: string;
-    category: string | null;
-    icon: string | null;
-  };
+  list: ListView;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const normalizedCategory = normalizeListCategory(list.category) ?? "other";
-  const normalizedIcon = normalizeListIconKey(list.icon);
+  const initialTitle = list.title;
+  const initialCategory = list.editorCategory;
+  const initialIcon = list.editorIconKey;
 
   const [title, setTitle] = useState(list.title);
-  const [category, setCategory] = useState(normalizedCategory);
-  const [icon, setIcon] = useState<ListIconKey | null>(normalizedIcon);
+  const [category, setCategory] = useState<ListCategory>(initialCategory);
+  const [icon, setIcon] = useState<ListIconKey | null>(initialIcon);
+
+  const cleanTitle = title.trim();
+  const isDirty =
+    cleanTitle !== initialTitle.trim() ||
+    category !== initialCategory ||
+    icon !== initialIcon;
 
   const openEditor = () => {
     setTitle(list.title);
-    setCategory(normalizedCategory);
-    setIcon(normalizedIcon);
+    setCategory(initialCategory);
+    setIcon(initialIcon);
     setIsOpen(true);
   };
 
   const handleSave = () => {
+    if (!isDirty || cleanTitle.length === 0) return;
+
     startTransition(async () => {
       const formData = new FormData();
       formData.append("listId", list.id);
-      formData.append("title", title);
+      formData.append("title", cleanTitle);
       formData.append("category", category);
       formData.append("icon", icon ?? "");
       await updateList(formData);
@@ -92,10 +92,7 @@ export function EditListForm({
                 id={`list-category-${list.id}`}
                 name="category"
                 value={category}
-                onChange={(e) => {
-                  const next = normalizeListCategory(e.target.value) ?? "other";
-                  setCategory(next);
-                }}
+                onChange={(e) => setCategory(e.target.value as ListCategory)}
                 disabled={isPending}
                 className="mt-1 w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-black disabled:opacity-60"
               >
@@ -155,7 +152,7 @@ export function EditListForm({
               <button
                 type="button"
                 onClick={handleSave}
-                disabled={isPending || title.trim().length === 0}
+                disabled={isPending || cleanTitle.length === 0 || !isDirty}
                 className="rounded bg-black text-white px-4 py-2 text-sm font-medium disabled:opacity-60"
               >
                 Save

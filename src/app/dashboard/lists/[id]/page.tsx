@@ -4,10 +4,7 @@ import Link from "next/link";
 import ListItemsSection from "@/app/dashboard/lists/_components/ListItemsSection";
 import { requireListById, getListItems } from "@/lib/queries/lists";
 import { AddListItemForm } from "@/app/dashboard/lists/_components/AddListItemForm";
-import {
-  normalizeListCategory,
-  splitListItemsByDone,
-} from "@/lib/presenters/lists";
+import { presentList, splitListItemsByDone } from "@/lib/presenters/lists";
 import { ListCategoryBadge } from "@/components/list-category-badge";
 import { ListAvatar } from "@/components/list-avatar";
 import { EditListForm } from "@/app/dashboard/lists/_components/EditListForm";
@@ -21,6 +18,7 @@ export default async function Page({ params }: ListPageProps) {
 
   // Fetch the list details from Supabase
   const list = await requireListById(id);
+  const listView = presentList(list);
 
   // Fetch the list items from Supabase
   const items = await getListItems(id);
@@ -38,23 +36,20 @@ export default async function Page({ params }: ListPageProps) {
       <article className="bg-gray-200 p-4 rounded text-black">
         <section className="flex items-start gap-4">
           <div className="flex gap-4 min-w-0">
-            <ListAvatar list={list} />
+            <ListAvatar avatar={listView.avatar} />
             <div className="min-w-0">
               <div className="flex items-center gap-2 min-w-0">
                 <h2 className="text-lg font-semibold mb-2 truncate">
-                  {list.title}
+                  {listView.title}
                 </h2>
-                {(() => {
-                  const category = normalizeListCategory(list.category);
-                  return category ? (
-                    <ListCategoryBadge category={category} />
-                  ) : null;
-                })()}
+                {listView.badgeCategory ? (
+                  <ListCategoryBadge category={listView.badgeCategory} />
+                ) : null}
               </div>
             </div>
           </div>
         </section>
-        <EditListForm list={list} />
+        <EditListForm list={listView} />
         <hr className="my-4" />
 
         <AddListItemForm listId={list.id} />

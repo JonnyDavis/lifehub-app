@@ -55,15 +55,17 @@ To apply your local migrations to the hosted database:
 
 Local dev data is intentionally **not** committed.
 
-- `supabase/seed.sql` is git-ignored (see `supabase/.gitignore`).
-- The local stack can load `supabase/seed.sql` during `npx supabase db reset` (see `supabase/config.toml`).
+- `supabase/seed.default.sql` is committed and provides a small, generic baseline dataset for local development.
+- `supabase/seed.sql` is git-ignored (see `supabase/.gitignore`) and is intended for local-only dumps/experiments.
+- The local stack loads `supabase/seed.default.sql` during `npx supabase db reset` (see `supabase/config.toml`).
 
 ### Keep local data between `db reset`s
 
 If you want to keep the data you created in the **local** Docker database, dump local data into `supabase/seed.sql` before resetting:
 
 - Dump local data: `npx supabase db dump --local --data-only --schema public --file supabase/seed.sql`
-- Reset + re-seed: `npx supabase db reset`
+- Reset (loads `seed.default.sql`): `npx supabase db reset`
+- Optional: load your local-only `supabase/seed.sql` after reset (e.g. via psql or Studio SQL editor).
 
 Note: `--linked` dumps data from the hosted (linked) Supabase project, not your local stack.
 
@@ -72,7 +74,7 @@ Note: `--linked` dumps data from the hosted (linked) Supabase project, not your 
 If you want your local DB to have the same app data as the hosted project:
 
 - Dump hosted data: `npx supabase db dump --linked --data-only --schema public --file supabase/seed.sql`
-- Load into local: `npx supabase db reset`
+- Load into local (loads `seed.default.sql`): `npx supabase db reset`
 
 ## Auth email templates (local)
 

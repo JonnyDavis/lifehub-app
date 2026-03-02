@@ -2,6 +2,7 @@ import {
   IMPORTANT_DATE_CATEGORIES,
   type ImportantDateCategory,
 } from "@/types/important-dates";
+import type { ImportantDate, ImportantDateView } from "@/types/important-dates";
 
 export function normalizeImportantDateCategory(
   value: unknown,
@@ -34,4 +35,23 @@ export function importantDateCategoryBadgeClass(
   if (category === "appointment") return "bg-green-200 text-green-900";
   if (category === "birthday") return "bg-pink-200 text-pink-900";
   return "bg-gray-200 text-gray-900";
+}
+
+/**
+ * Convert a DB-ish important date into a UI-friendly view model.
+ *
+ * This matches the `presentList()` pattern:
+ * - normalization/defaulting happens once here
+ * - UI can render from the returned plain JS object
+ */
+export function presentImportantDate(
+  date: Pick<ImportantDate, "id" | "title" | "date" | "notes" | "category">,
+): ImportantDateView {
+  return {
+    id: date.id,
+    title: date.title,
+    date: date.date,
+    notes: date.notes,
+    category: normalizeImportantDateCategory(date.category),
+  };
 }

@@ -5,10 +5,11 @@ import { getLists } from "@/lib/queries/lists";
 import { CreateListForm } from "@/app/dashboard/lists/_components/CreateListForm";
 import { ListCategoryBadge } from "@/components/list-category-badge";
 import { ListAvatar } from "@/components/list-avatar";
-import { normalizeListCategory } from "@/lib/presenters/lists";
+import { presentList } from "@/lib/presenters/lists";
 
 export default async function Page() {
   const lists = await getLists();
+  const listViews = lists.map(presentList);
 
   return (
     <article>
@@ -22,24 +23,21 @@ export default async function Page() {
             No lists found. Start by creating a new list above.
           </div>
         ) : (
-          lists.map((list) => (
+          listViews.map((list) => (
             <Link
               key={list.id}
               href={`/dashboard/lists/${list.id}`}
               className="flex gap-4 bg-gray-200 p-4 rounded text-black"
             >
-              <ListAvatar list={list} />
+              <ListAvatar avatar={list.avatar} />
               <div className="min-w-0">
                 <div className="flex items-center gap-2 min-w-0">
                   <h2 className="text-lg font-semibold mb-2 truncate">
                     {list.title}
                   </h2>
-                  {(() => {
-                    const category = normalizeListCategory(list.category);
-                    return category ? (
-                      <ListCategoryBadge category={category} />
-                    ) : null;
-                  })()}
+                  {list.badgeCategory ? (
+                    <ListCategoryBadge category={list.badgeCategory} />
+                  ) : null}
                 </div>
               </div>
             </Link>

@@ -33,6 +33,19 @@ export type List = {
   category: string | null;
 };
 
+export type ListAvatarView =
+  | { kind: "icon"; icon: ListIconKey }
+  | { kind: "text"; text: string };
+
+export type ListView = {
+  id: string;
+  title: string;
+  badgeCategory: ListCategory | null;
+  editorCategory: ListCategory;
+  editorIconKey: ListIconKey | null;
+  avatar: ListAvatarView;
+};
+
 export type ListItem = {
   id: string;
   label: string;

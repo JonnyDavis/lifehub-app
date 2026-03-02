@@ -6,6 +6,31 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeImportantDateCategory } from "@/lib/presenters/important-dates";
 import { normalizeImportantDatesView } from "@/types/important-dates";
+import { importantDatesTable } from "@/lib/supabase/tables";
+
+function getRequiredTrimmedString(
+  formData: FormData,
+  key: string,
+): string | null {
+  const value = formData.get(key);
+  if (!value || typeof value !== "string" || value.trim().length === 0) {
+    return null;
+  }
+  return value.trim();
+}
+
+function getRequiredString(formData: FormData, key: string): string | null {
+  const value = formData.get(key);
+  if (!value || typeof value !== "string") return null;
+  return value;
+}
+
+function getOptionalTrimmedString(formData: FormData, key: string): string | null {
+  const value = formData.get(key);
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
 
 function todayISODateLocal() {
   const now = new Date();
@@ -25,26 +50,18 @@ function currentMonthISO() {
 export async function createImportantDate(formData: FormData) {
   const supabase = await createClient();
 
-  const title = formData.get("title");
-  const date = formData.get("date");
-  const notes = formData.get("notes");
+  const cleanTitle = getRequiredTrimmedString(formData, "title");
+  const cleanDate = getRequiredTrimmedString(formData, "date");
+  const cleanNotes = getOptionalTrimmedString(formData, "notes");
   const category = formData.get("category");
 
-  if (!title || typeof title !== "string" || title.trim().length === 0) {
+  if (!cleanTitle || !cleanDate) {
     return;
   }
 
-  if (!date || typeof date !== "string" || date.trim().length === 0) {
-    return;
-  }
-
-  const cleanTitle = title.trim();
-  const cleanDate = date.trim();
-  const cleanNotes =
-    typeof notes === "string" && notes.trim().length > 0 ? notes.trim() : null;
   const cleanCategory = normalizeImportantDateCategory(category);
 
-  const { error } = await supabase.from("important_dates").insert({
+  const { error } = await importantDatesTable(supabase).insert({
     title: cleanTitle,
     date: cleanDate,
     notes: cleanNotes,
@@ -63,35 +80,26 @@ export async function createImportantDate(formData: FormData) {
 export async function updateImportantDate(formData: FormData) {
   const supabase = await createClient();
 
-  const id = formData.get("id");
-  const title = formData.get("title");
-  const date = formData.get("date");
-  const notes = formData.get("notes");
+  const id = getRequiredString(formData, "id");
+  const cleanTitle = getRequiredTrimmedString(formData, "title");
+  const cleanDate = getRequiredTrimmedString(formData, "date");
+  const cleanNotes = getOptionalTrimmedString(formData, "notes");
   const category = formData.get("category");
   const view = formData.get("view");
 
-  if (!id || typeof id !== "string") {
+  if (!id) {
     console.error("Missing or invalid id in updateImportantDate");
     return;
   }
 
-  if (!title || typeof title !== "string" || title.trim().length === 0) {
+  if (!cleanTitle || !cleanDate) {
     return;
   }
 
-  if (!date || typeof date !== "string" || date.trim().length === 0) {
-    return;
-  }
-
-  const cleanTitle = title.trim();
-  const cleanDate = date.trim();
-  const cleanNotes =
-    typeof notes === "string" && notes.trim().length > 0 ? notes.trim() : null;
   const cleanCategory = normalizeImportantDateCategory(category);
   const cleanView = normalizeImportantDatesView(view);
 
-  const { error } = await supabase
-    .from("important_dates")
+  const { error } = await importantDatesTable(supabase)
     .update({
       title: cleanTitle,
       date: cleanDate,
@@ -147,8 +155,7 @@ export async function deleteImportantDate(formData: FormData) {
     return;
   }
 
-  const { error } = await supabase
-    .from("important_dates")
+  const { error } = await importantDatesTable(supabase)
     .delete()
     .eq("id", id);
 
