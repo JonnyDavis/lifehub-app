@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { normalizeListCategory } from "@/lib/presenters/lists";
 import { normalizeListIconKey } from "@/lib/presenters/lists";
 import type { ListIconKey } from "@/types/lists";
+import { listItemsTable, listsTable } from "@/lib/supabase/tables";
 
 function getRequiredTrimmedString(
   formData: FormData,
@@ -60,7 +61,7 @@ export async function createList(formData: FormData) {
 
   const cleanCategory = parseListCategoryWithDefault(category);
 
-  const { error } = await supabase.from("lists").insert({
+  const { error } = await listsTable(supabase).insert({
     title: cleanTitle,
     category: cleanCategory,
     // missing icon for now
@@ -101,7 +102,7 @@ export async function createListItem(formData: FormData) {
       ? quantity.trim()
       : null;
 
-  const { error } = await supabase.from("list_items").insert({
+  const { error } = await listItemsTable(supabase).insert({
     list_id: listId,
     label: cleanLabel,
     quantity: cleanQuantity,
@@ -136,8 +137,7 @@ export async function toggleListItem(formData: FormData) {
 
   const nextIsDone = nextDone === "true";
 
-  const { error } = await supabase
-    .from("list_items")
+  const { error } = await listItemsTable(supabase)
     .update({
       is_done: nextIsDone,
     })
@@ -166,7 +166,7 @@ export async function deleteListItem(formData: FormData) {
     return;
   }
 
-  const { error } = await supabase.from("list_items").delete().eq("id", itemId);
+  const { error } = await listItemsTable(supabase).delete().eq("id", itemId);
 
   if (error) {
     console.error("Error deleting list item:", error);
@@ -199,8 +199,7 @@ export async function updateList(formData: FormData) {
     return;
   }
 
-  const { error } = await supabase
-    .from("lists")
+  const { error } = await listsTable(supabase)
     .update({
       title: cleanTitle,
       category: cleanCategory,

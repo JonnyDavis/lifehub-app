@@ -1,13 +1,18 @@
 import { notFound } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import {
+  LIST_ITEMS_SELECT,
+  LISTS_SELECT,
+  listItemsTable,
+  listsTable,
+} from "@/lib/supabase/tables";
 import type { List, ListItem } from "@/types/lists";
 
 export async function getLists() {
   const supabase = await createClient();
-  const { data: lists, error } = await supabase
-    .from("lists")
-    .select("id, title, icon, category")
+  const { data: lists, error } = await listsTable(supabase)
+    .select(LISTS_SELECT)
     .order("created_at", { ascending: true });
 
   if (error) {
@@ -20,9 +25,8 @@ export async function getLists() {
 
 export async function getListById(id: string) {
   const supabase = await createClient();
-  const { data: list, error: error } = await supabase
-    .from("lists")
-    .select("id, title, icon, category")
+  const { data: list, error: error } = await listsTable(supabase)
+    .select(LISTS_SELECT)
     .eq("id", id)
     .maybeSingle();
 
@@ -49,9 +53,8 @@ export async function requireListById(id: string) {
 
 export async function getListItems(listId: string) {
   const supabase = await createClient();
-  const { data: items, error } = await supabase
-    .from("list_items")
-    .select("id, label, quantity, is_done, position")
+  const { data: items, error } = await listItemsTable(supabase)
+    .select(LIST_ITEMS_SELECT)
     .eq("list_id", listId)
     .order("created_at", { ascending: true });
 

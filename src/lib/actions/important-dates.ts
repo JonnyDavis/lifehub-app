@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeImportantDateCategory } from "@/lib/presenters/important-dates";
 import { normalizeImportantDatesView } from "@/types/important-dates";
+import { importantDatesTable } from "@/lib/supabase/tables";
 
 function todayISODateLocal() {
   const now = new Date();
@@ -44,7 +45,7 @@ export async function createImportantDate(formData: FormData) {
     typeof notes === "string" && notes.trim().length > 0 ? notes.trim() : null;
   const cleanCategory = normalizeImportantDateCategory(category);
 
-  const { error } = await supabase.from("important_dates").insert({
+  const { error } = await importantDatesTable(supabase).insert({
     title: cleanTitle,
     date: cleanDate,
     notes: cleanNotes,
@@ -90,8 +91,7 @@ export async function updateImportantDate(formData: FormData) {
   const cleanCategory = normalizeImportantDateCategory(category);
   const cleanView = normalizeImportantDatesView(view);
 
-  const { error } = await supabase
-    .from("important_dates")
+  const { error } = await importantDatesTable(supabase)
     .update({
       title: cleanTitle,
       date: cleanDate,
@@ -147,8 +147,7 @@ export async function deleteImportantDate(formData: FormData) {
     return;
   }
 
-  const { error } = await supabase
-    .from("important_dates")
+  const { error } = await importantDatesTable(supabase)
     .delete()
     .eq("id", id);
 

@@ -1,4 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
+import {
+  IMPORTANT_DATES_SELECT,
+  UPCOMING_IMPORTANT_DATES_SELECT,
+  importantDatesTable,
+} from "@/lib/supabase/tables";
 import type {
   ImportantDate,
   ImportantDatesView,
@@ -27,9 +32,8 @@ function currentMonthRangeISO() {
 
 export async function getImportantDates() {
   const supabase = await createClient();
-  const { data: dates, error } = await supabase
-    .from("important_dates")
-    .select("id, title, date, notes, category, created_at")
+  const { data: dates, error } = await importantDatesTable(supabase)
+    .select(IMPORTANT_DATES_SELECT)
     .order("date", { ascending: true })
     .order("created_at", { ascending: true });
 
@@ -44,9 +48,8 @@ export async function getImportantDates() {
 // This is a simplified version of getImportantDates that only returns the next few upcoming dates, which is used on the dashboard.
 export async function getUpcomingImportantDates(limit = 4) {
   const supabase = await createClient();
-  const { data: dates, error } = await supabase
-    .from("important_dates")
-    .select("id, title, date, notes, category")
+  const { data: dates, error } = await importantDatesTable(supabase)
+    .select(UPCOMING_IMPORTANT_DATES_SELECT)
     .gte("date", todayISODate())
     .order("date", { ascending: true })
     .limit(limit);
@@ -64,9 +67,7 @@ export async function getImportantDatesForView(view: ImportantDatesView) {
   const supabase = await createClient();
   const today = todayISODate();
 
-  let query = supabase
-    .from("important_dates")
-    .select("id, title, date, notes, category, created_at");
+  let query = importantDatesTable(supabase).select(IMPORTANT_DATES_SELECT);
 
   if (view === "upcoming") {
     query = query.gte("date", today);
