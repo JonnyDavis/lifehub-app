@@ -16,12 +16,19 @@ export function EditListForm({
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
+  const initialTitle = list.title;
   const initialCategory = list.editorCategory;
   const initialIcon = list.editorIconKey;
 
   const [title, setTitle] = useState(list.title);
   const [category, setCategory] = useState<ListCategory>(initialCategory);
   const [icon, setIcon] = useState<ListIconKey | null>(initialIcon);
+
+  const cleanTitle = title.trim();
+  const isDirty =
+    cleanTitle !== initialTitle.trim() ||
+    category !== initialCategory ||
+    icon !== initialIcon;
 
   const openEditor = () => {
     setTitle(list.title);
@@ -31,10 +38,12 @@ export function EditListForm({
   };
 
   const handleSave = () => {
+    if (!isDirty || cleanTitle.length === 0) return;
+
     startTransition(async () => {
       const formData = new FormData();
       formData.append("listId", list.id);
-      formData.append("title", title);
+      formData.append("title", cleanTitle);
       formData.append("category", category);
       formData.append("icon", icon ?? "");
       await updateList(formData);
@@ -143,7 +152,7 @@ export function EditListForm({
               <button
                 type="button"
                 onClick={handleSave}
-                disabled={isPending || title.trim().length === 0}
+                disabled={isPending || cleanTitle.length === 0 || !isDirty}
                 className="rounded bg-black text-white px-4 py-2 text-sm font-medium disabled:opacity-60"
               >
                 Save
