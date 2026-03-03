@@ -226,9 +226,7 @@ function getDefaultSeedData(userId: string) {
 // runs per user, and uses `seed_key` + insert-if-missing semantics to avoid duplicates.
 export async function ensureUserBootstrappedDefaults(
   supabase: SupabaseClient,
-  {
-    staleClaimAfterMs = 5 * 60 * 1000,
-  }: { staleClaimAfterMs?: number } = {},
+  { staleClaimAfterMs = 5 * 60 * 1000 }: { staleClaimAfterMs?: number } = {},
 ) {
   // Must run in an authenticated context (server client with cookies).
   const { data: userData, error: userError } = await supabase.auth.getUser();
@@ -249,6 +247,21 @@ export async function ensureUserBootstrappedDefaults(
     return;
   }
 
+  // Fast path: if a previous request already bootstrapped this user, do nothing.
+  // (The bootstrap route can be visited directly, and we want it to be safe/cheap.)
+  const { data: profile, error: profileError } = await profilesTable(supabase)
+    .select("bootstrap_state")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (profileError) {
+    console.error("Error reading profile bootstrap state:", profileError);
+  } else if (profile?.bootstrap_state === "done") {
+    return;
+  }
+
+  // Try to "claim" bootstrapping for this user. Only one request should win, but
+  // everything below is also idempotent (unique indexes + ignoreDuplicates).
   const claimTime = new Date().toISOString();
   const staleBefore = new Date(Date.now() - staleClaimAfterMs).toISOString();
 
@@ -270,26 +283,24 @@ export async function ensureUserBootstrappedDefaults(
   if ((claimed ?? []).length === 0) {
     // Another request is currently bootstrapping. If it's been "stuck" too long,
     // reclaim it so the user can recover from partial failures.
-    const { data: reclaimed, error: reclaimError } = await profilesTable(
-      supabase,
-    )
+    // If it's not stale, we still proceed (writes are idempotent) to avoid
+    // redirect loops when state is `in_progress`.
+    const { error: reclaimError } = await profilesTable(supabase)
       .update({
         bootstrap_state: "in_progress",
         bootstrap_started_at: claimTime,
       })
       .eq("user_id", userId)
       .eq("bootstrap_state", "in_progress")
-      .lt("bootstrap_started_at", staleBefore)
-      .select("user_id");
+      .lt("bootstrap_started_at", staleBefore);
 
     if (reclaimError) {
       console.error("Error reclaiming stale bootstrap:", reclaimError);
       return;
     }
 
-    if ((reclaimed ?? []).length === 0) {
-      return;
-    }
+    // If it's not stale, another request is likely finishing the bootstrap.
+    // Continue anyway: inserts are idempotent (unique indexes + ignoreDuplicates).
   }
 
   try {

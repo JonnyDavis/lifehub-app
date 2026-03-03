@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/logout-button";
-import { ensureUserBootstrappedDefaults } from "@/lib/actions/bootstrap-defaults";
+import { profilesTable } from "@/lib/supabase/tables";
 
 export default async function Layout({
   children,
@@ -16,7 +16,32 @@ export default async function Layout({
     redirect("/auth/login");
   }
 
-  await ensureUserBootstrappedDefaults(supabase);
+  // We redirect new users through `/dashboard/bootstrap` to avoid doing DB writes
+  // during the Server Component render, which can race with the dashboard page's
+  // initial reads (and cause defaults to appear only after a refresh).
+  //
+  // This layout only *checks* whether bootstrapping is done; the bootstrap route
+  // is responsible for running the inserts and then redirecting back.
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData.user) {
+    redirect("/auth/login");
+  }
+
+  // `profiles.user_id` is the primary key, so we can look up per-user bootstrap
+  // state cheaply. If there is no row yet, treat it as "not bootstrapped".
+  const { data: profile, error: profileError } = await profilesTable(supabase)
+    .select("bootstrap_state")
+    .eq("user_id", userData.user.id)
+    .maybeSingle();
+
+  if (profileError) {
+    console.error("Error reading profile bootstrap state:", profileError);
+  }
+
+  // Anything other than `done` (including `null`) means we should run bootstrap.
+  if (profile?.bootstrap_state !== "done") {
+    redirect("/dashboard/bootstrap");
+  }
 
   return (
     <>
