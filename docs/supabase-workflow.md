@@ -59,6 +59,8 @@ Local dev data is intentionally **not** committed.
 - `supabase/seed.sql` is git-ignored (see `supabase/.gitignore`) and is intended for local-only dumps/experiments.
 - The local stack loads `supabase/seed.default.sql` during `npx supabase db reset` (see `supabase/config.toml`).
 
+Note: with strict per-user RLS enabled, rows inserted by `seed.default.sql` may not be visible in-app unless they are owned by your authenticated user (e.g. `user_id = auth.uid()`). In practice, after `db reset`, create data via the app UI (or load a local-only `seed.sql` captured after creating data while logged in).
+
 ### Keep local data between `db reset`s
 
 If you want to keep the data you created in the **local** Docker database, dump local data into `supabase/seed.sql` before resetting:
