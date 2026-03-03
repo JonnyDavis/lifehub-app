@@ -8,6 +8,10 @@ export const IMPORTANT_DATES_SELECT =
 export const UPCOMING_IMPORTANT_DATES_SELECT =
   "id, title, date, notes, category" as const;
 
+export function profilesTable(supabase: SupabaseClient) {
+  return supabase.from("profiles");
+}
+
 export function listsTable(supabase: SupabaseClient) {
   return supabase.from("lists");
 }
@@ -19,4 +23,3 @@ export function listItemsTable(supabase: SupabaseClient) {
 export function importantDatesTable(supabase: SupabaseClient) {
   return supabase.from("important_dates");
 }
-
