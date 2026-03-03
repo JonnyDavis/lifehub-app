@@ -7,8 +7,9 @@
 // - Strict RLS stays intact: rows are owned by `auth.uid()` (via DB defaults).
 // - Idempotent: safe if this runs multiple times (refresh/multi-tab).
 // - Race-tolerant: only one request "wins" the bootstrap for a user.
+// - Keep the code easy to follow: seeded rows get stable `seed_key`s, enforced
+//   by unique indexes (see `supabase/migrations/*_add_seed_keys_for_bootstrap.sql`).
 
-import { createHash } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import {
@@ -17,42 +18,6 @@ import {
   listsTable,
   profilesTable,
 } from "@/lib/supabase/tables";
-
-// Stable UUID namespace for deterministic IDs. Do not change once deployed,
-// otherwise the same user would get a different set of IDs on re-run.
-const UUID_NAMESPACE_LIFEHUB = "9c1e1f4c-1d2b-4b5e-9a9b-0d3a7c5b2a11";
-
-// UUID helpers for RFC 4122 v5 generation.
-function uuidToBytes(uuid: string) {
-  const hex = uuid.replace(/-/g, "");
-  if (hex.length !== 32) {
-    throw new Error(`Invalid UUID: ${uuid}`);
-  }
-  return Buffer.from(hex, "hex");
-}
-
-function bytesToUuid(bytes: Buffer) {
-  const hex = bytes.toString("hex");
-  return [
-    hex.slice(0, 8),
-    hex.slice(8, 12),
-    hex.slice(12, 16),
-    hex.slice(16, 20),
-    hex.slice(20, 32),
-  ].join("-");
-}
-
-// RFC 4122 UUID v5 (SHA-1) for stable, idempotent IDs.
-function uuidv5(name: string, namespace: string) {
-  const nsBytes = uuidToBytes(namespace);
-  const nameBytes = Buffer.from(name, "utf8");
-  const hash = createHash("sha1").update(nsBytes).update(nameBytes).digest();
-
-  const bytes = Buffer.from(hash.slice(0, 16));
-  bytes[6] = (bytes[6] & 0x0f) | 0x50; // version 5
-  bytes[8] = (bytes[8] & 0x3f) | 0x80; // variant RFC 4122
-  return bytesToUuid(bytes);
-}
 
 // Generates a YYYY-MM-DD string relative to today's UTC midnight.
 function isoDateAddDaysUTC(days: number) {
@@ -66,58 +31,62 @@ function isoDateAddDaysUTC(days: number) {
   return next.toISOString().slice(0, 10);
 }
 
-type DefaultListKey =
+type DefaultListSeedKey =
   | "groceries"
   | "house-chores"
   | "weekend-trip"
   | "work-admin"
   | "errands";
 
-// Mirrors `supabase/seed.default.sql`, but generates per-user stable IDs so we can
-// safely upsert and avoid duplicates.
+// Mirrors `supabase/seed.default.sql`, but assigns per-user `seed_key`s so we can
+// insert defaults once without deterministic UUID generation.
 function getDefaultSeedData(userId: string) {
-  const listIdFor = (key: DefaultListKey) =>
-    uuidv5(`${userId}:lists:${key}`, UUID_NAMESPACE_LIFEHUB);
-
   const lists = [
     {
-      id: listIdFor("groceries"),
+      user_id: userId,
+      seed_key: "groceries" as const,
       title: "Groceries",
       category: "shopping",
       icon: "shopping-cart",
     },
     {
-      id: listIdFor("house-chores"),
+      user_id: userId,
+      seed_key: "house-chores" as const,
       title: "House Chores",
       category: "chores",
       icon: null,
     },
     {
-      id: listIdFor("weekend-trip"),
+      user_id: userId,
+      seed_key: "weekend-trip" as const,
       title: "Weekend Trip",
       category: "packing",
       icon: "✈️",
     },
     {
-      id: listIdFor("work-admin"),
+      user_id: userId,
+      seed_key: "work-admin" as const,
       title: "Work Admin",
       category: "other",
       icon: "WFH",
     },
     {
-      id: listIdFor("errands"),
+      user_id: userId,
+      seed_key: "errands" as const,
       title: "Errands",
       category: "errands",
       // Intentionally invalid icon string to exercise UI fallback behavior.
       icon: "deliveries",
     },
-  ] as const;
+  ];
+
+  const listSeedKeys = lists.map((l) => l.seed_key) as DefaultListSeedKey[];
 
   const listItems = [
     // Groceries
     {
-      id: uuidv5(`${userId}:list_items:groceries:milk`, UUID_NAMESPACE_LIFEHUB),
-      list_id: listIdFor("groceries"),
+      list_seed_key: "groceries" as const,
+      seed_key: "milk",
       label: "Milk",
       quantity: "2L",
       notes: null,
@@ -125,11 +94,8 @@ function getDefaultSeedData(userId: string) {
       position: null,
     },
     {
-      id: uuidv5(
-        `${userId}:list_items:groceries:apples`,
-        UUID_NAMESPACE_LIFEHUB,
-      ),
-      list_id: listIdFor("groceries"),
+      list_seed_key: "groceries" as const,
+      seed_key: "apples",
       label: "Apples",
       quantity: "6",
       notes: null,
@@ -137,11 +103,8 @@ function getDefaultSeedData(userId: string) {
       position: null,
     },
     {
-      id: uuidv5(
-        `${userId}:list_items:groceries:bread`,
-        UUID_NAMESPACE_LIFEHUB,
-      ),
-      list_id: listIdFor("groceries"),
+      list_seed_key: "groceries" as const,
+      seed_key: "bread",
       label: "Bread",
       quantity: null,
       notes: null,
@@ -151,11 +114,8 @@ function getDefaultSeedData(userId: string) {
 
     // House Chores
     {
-      id: uuidv5(
-        `${userId}:list_items:house-chores:take-out-trash`,
-        UUID_NAMESPACE_LIFEHUB,
-      ),
-      list_id: listIdFor("house-chores"),
+      list_seed_key: "house-chores" as const,
+      seed_key: "take-out-trash",
       label: "Take out trash",
       quantity: null,
       notes: null,
@@ -163,11 +123,8 @@ function getDefaultSeedData(userId: string) {
       position: null,
     },
     {
-      id: uuidv5(
-        `${userId}:list_items:house-chores:vacuum-living-room`,
-        UUID_NAMESPACE_LIFEHUB,
-      ),
-      list_id: listIdFor("house-chores"),
+      list_seed_key: "house-chores" as const,
+      seed_key: "vacuum-living-room",
       label: "Vacuum living room",
       quantity: null,
       notes: null,
@@ -177,11 +134,8 @@ function getDefaultSeedData(userId: string) {
 
     // Weekend Trip
     {
-      id: uuidv5(
-        `${userId}:list_items:weekend-trip:passport`,
-        UUID_NAMESPACE_LIFEHUB,
-      ),
-      list_id: listIdFor("weekend-trip"),
+      list_seed_key: "weekend-trip" as const,
+      seed_key: "passport",
       label: "Passport",
       quantity: null,
       notes: null,
@@ -189,11 +143,8 @@ function getDefaultSeedData(userId: string) {
       position: null,
     },
     {
-      id: uuidv5(
-        `${userId}:list_items:weekend-trip:toothbrush`,
-        UUID_NAMESPACE_LIFEHUB,
-      ),
-      list_id: listIdFor("weekend-trip"),
+      list_seed_key: "weekend-trip" as const,
+      seed_key: "toothbrush",
       label: "Toothbrush",
       quantity: null,
       notes: null,
@@ -203,11 +154,8 @@ function getDefaultSeedData(userId: string) {
 
     // Errands
     {
-      id: uuidv5(
-        `${userId}:list_items:errands:post-office`,
-        UUID_NAMESPACE_LIFEHUB,
-      ),
-      list_id: listIdFor("errands"),
+      list_seed_key: "errands" as const,
+      seed_key: "post-office",
       label: "Post office",
       quantity: null,
       notes: null,
@@ -215,77 +163,72 @@ function getDefaultSeedData(userId: string) {
       position: null,
     },
     {
-      id: uuidv5(
-        `${userId}:list_items:errands:pick-up-dry-cleaning`,
-        UUID_NAMESPACE_LIFEHUB,
-      ),
-      list_id: listIdFor("errands"),
+      list_seed_key: "errands" as const,
+      seed_key: "pick-up-dry-cleaning",
       label: "Pick up dry cleaning",
       quantity: null,
       notes: null,
       is_done: false,
       position: null,
     },
-  ] as const;
+  ];
 
   const importantDates = [
     {
-      id: uuidv5(`${userId}:important_dates:dentist`, UUID_NAMESPACE_LIFEHUB),
+      user_id: userId,
+      seed_key: "dentist",
       title: "Dentist",
       date: isoDateAddDaysUTC(10),
       notes: "Bring insurance card",
       category: "appointment",
     },
     {
-      id: uuidv5(`${userId}:important_dates:pay-rent`, UUID_NAMESPACE_LIFEHUB),
+      user_id: userId,
+      seed_key: "pay-rent",
       title: "Pay rent",
       date: isoDateAddDaysUTC(1),
       notes: null,
       category: "deadline",
     },
     {
-      id: uuidv5(
-        `${userId}:important_dates:alex-birthday`,
-        UUID_NAMESPACE_LIFEHUB,
-      ),
+      user_id: userId,
+      seed_key: "alex-birthday",
       title: "Alex birthday",
       date: isoDateAddDaysUTC(-14),
       notes: null,
       category: "birthday",
     },
     {
-      id: uuidv5(
-        `${userId}:important_dates:concert-tickets`,
-        UUID_NAMESPACE_LIFEHUB,
-      ),
+      user_id: userId,
+      seed_key: "concert-tickets",
       title: "Concert tickets",
       date: isoDateAddDaysUTC(60),
       notes: null,
       category: "event",
     },
     {
-      id: uuidv5(
-        `${userId}:important_dates:passport-renewal`,
-        UUID_NAMESPACE_LIFEHUB,
-      ),
+      user_id: userId,
+      seed_key: "passport-renewal",
       title: "Passport renewal",
       date: isoDateAddDaysUTC(180),
       notes: null,
       category: "renewal",
     },
-  ] as const;
+  ];
 
-  return { lists, listItems, importantDates };
+  return { lists, listSeedKeys, listItems, importantDates };
 }
 
 // Ensure a user has their "starter" dataset.
 //
 // Called from the authenticated dashboard layout. This is intentionally safe to call
 // on every request: it uses `profiles.bootstrap_state` to ensure only one bootstrap
-// runs per user, and uses deterministic IDs + upserts to make re-runs harmless.
+// runs per user, and uses `seed_key` + insert-if-missing semantics to avoid duplicates.
 export async function ensureUserBootstrappedDefaults(
   supabase: SupabaseClient,
-  { staleClaimAfterMs = 5 * 60 * 1000 }: { staleClaimAfterMs?: number } = {},
+  {
+    staleClaimAfterMs = 5 * 60 * 1000,
+  }: { staleClaimAfterMs?: number } = {},
 ) {
   // Must run in an authenticated context (server client with cookies).
   const { data: userData, error: userError } = await supabase.auth.getUser();
@@ -310,28 +253,21 @@ export async function ensureUserBootstrappedDefaults(
   const staleBefore = new Date(Date.now() - staleClaimAfterMs).toISOString();
 
   // Claim the bootstrap by transitioning state: not_started -> in_progress.
-  const claim = async () => {
-    const { data: claimed, error: claimError } = await profilesTable(supabase)
-      .update({
-        bootstrap_state: "in_progress",
-        bootstrap_started_at: claimTime,
-      })
-      .eq("user_id", userId)
-      .eq("bootstrap_state", "not_started")
-      .select("user_id");
-
-    if (claimError) return { claimed: false, error: claimError };
-    return { claimed: (claimed ?? []).length > 0, error: null };
-  };
-
-  const { claimed, error: claimError } = await claim();
+  const { data: claimed, error: claimError } = await profilesTable(supabase)
+    .update({
+      bootstrap_state: "in_progress",
+      bootstrap_started_at: claimTime,
+    })
+    .eq("user_id", userId)
+    .eq("bootstrap_state", "not_started")
+    .select("user_id");
 
   if (claimError) {
     console.error("Error claiming bootstrap:", claimError);
     return;
   }
 
-  if (!claimed) {
+  if ((claimed ?? []).length === 0) {
     // Another request is currently bootstrapping. If it's been "stuck" too long,
     // reclaim it so the user can recover from partial failures.
     const { data: reclaimed, error: reclaimError } = await profilesTable(
@@ -386,25 +322,59 @@ export async function ensureUserBootstrappedDefaults(
       return;
     }
 
-    const { lists, listItems, importantDates } = getDefaultSeedData(userId);
+    const { lists, listSeedKeys, listItems, importantDates } =
+      getDefaultSeedData(userId);
 
-    // Upsert in dependency order so list_items RLS (via parent list) passes.
+    // Insert-if-missing for seeded rows (avoid overwriting any user edits).
     const { error: listsError } = await listsTable(supabase).upsert(lists, {
-      onConflict: "id",
+      onConflict: "user_id,seed_key",
+      ignoreDuplicates: true,
     });
     if (listsError) throw listsError;
 
+    const { data: seededLists, error: seededListsError } = await listsTable(
+      supabase,
+    )
+      .select("id, seed_key")
+      .eq("user_id", userId)
+      .in("seed_key", listSeedKeys);
+    if (seededListsError) throw seededListsError;
+
+    const listIdBySeedKey = new Map<string, string>(
+      (seededLists ?? []).map((l) => [l.seed_key as string, l.id as string]),
+    );
+
+    for (const seedKey of listSeedKeys) {
+      if (!listIdBySeedKey.has(seedKey)) {
+        throw new Error(`Missing seeded list id for seed_key=${seedKey}`);
+      }
+    }
+
+    // list_items references `lists.id`, so we need a mapping step from our human
+    // `seed_key` identifiers -> the actual list UUIDs created by Postgres.
+    const listItemsWithListIds = listItems.map((item) => ({
+      list_id: listIdBySeedKey.get(item.list_seed_key)!,
+      seed_key: item.seed_key,
+      label: item.label,
+      quantity: item.quantity,
+      notes: item.notes,
+      is_done: item.is_done,
+      position: item.position,
+    }));
+
+    // Upsert list items after lists exist so list_items RLS (via parent list) passes.
     const { error: itemsError } = await listItemsTable(supabase).upsert(
-      listItems,
+      listItemsWithListIds,
       {
-        onConflict: "id",
+        onConflict: "list_id,seed_key",
+        ignoreDuplicates: true,
       },
     );
     if (itemsError) throw itemsError;
 
     const { error: datesError } = await importantDatesTable(supabase).upsert(
       importantDates,
-      { onConflict: "id" },
+      { onConflict: "user_id,seed_key", ignoreDuplicates: true },
     );
     if (datesError) throw datesError;
 

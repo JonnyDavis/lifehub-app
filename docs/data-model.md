@@ -20,6 +20,7 @@ Used fields (based on queries/actions):
 - `title` (text)
 - `category` (text, nullable)
 - `icon` (text, nullable)
+- `seed_key` (text, nullable; internal for bootstrapped defaults)
 - `user_id` (uuid, FK → `auth.users.id`, default = `auth.uid()`)
 - `created_at` (timestamptz)
 
@@ -28,6 +29,7 @@ Used fields (based on queries/actions):
 Used fields:
 - `id` (uuid)
 - `list_id` (uuid, FK → `lists.id`)
+- `seed_key` (text, nullable; internal for bootstrapped defaults)
 - `label` (text)
 - `quantity` (text, nullable)
 - `is_done` (boolean)
@@ -44,6 +46,7 @@ Used fields:
 - `date` (date)
 - `category` (text)
 - `notes` (text, nullable)
+- `seed_key` (text, nullable; internal for bootstrapped defaults)
 - `user_id` (uuid, FK → `auth.users.id`, default = `auth.uid()`)
 - `created_at` (timestamptz)
 
