@@ -4,6 +4,15 @@ This repo currently relies on Supabase tables for lists and important dates. “
 
 ## Implemented (used by code today)
 
+### `profiles`
+
+Used fields:
+- `user_id` (uuid, PK, FK → `auth.users.id`)
+- `bootstrap_state` (text)
+- `bootstrap_started_at` (timestamptz, nullable)
+- `bootstrapped_at` (timestamptz, nullable)
+- `created_at` (timestamptz)
+
 ### `lists`
 
 Used fields (based on queries/actions):
@@ -45,7 +54,6 @@ Used fields:
 Goal: all user data is scoped to a “household”.
 
 Potential tables:
-- `profiles` (app profile tied to `auth.users`)
 - `households`
 - `household_members`
 

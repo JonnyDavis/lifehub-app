@@ -50,6 +50,7 @@ When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`):
 - RLS enforces per-user data access (rows are scoped to the authenticated user via `user_id = auth.uid()`).
   - `lists` and `important_dates` have a `user_id` column with `DEFAULT auth.uid()`.
   - `list_items` is scoped via its parent `lists` row.
+- On first `/dashboard` load for a new user, the app bootstraps a small default dataset (lists, items, dates) owned by that user.
 - Current lists queries/actions use the Supabase server client from `src/lib/supabase/server.ts`.
   - `lists` includes an optional `category` column (used for list “type”/category).
 

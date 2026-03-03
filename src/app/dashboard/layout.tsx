@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/logout-button";
+import { ensureUserBootstrappedDefaults } from "@/lib/actions/bootstrap-defaults";
 
 export default async function Layout({
   children,
@@ -14,6 +15,8 @@ export default async function Layout({
   if (error || !data?.claims) {
     redirect("/auth/login");
   }
+
+  await ensureUserBootstrappedDefaults(supabase);
 
   return (
     <>
