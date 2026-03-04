@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { unstable_noStore as noStore } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/logout-button";
@@ -9,6 +10,10 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
+  // Dashboard content is user-specific and (Phase 3+) depends on the DB-selected active household.
+  // Avoid serving cached Server Component payloads across household switches.
+  noStore();
+
   const supabase = await createClient();
 
   const { data, error } = await supabase.auth.getClaims();
@@ -60,6 +65,9 @@ export default async function Layout({
             </Link>
             <Link href="/dashboard/dates" className="hover:underline">
               Dates
+            </Link>
+            <Link href="/dashboard/household" className="hover:underline">
+              Workspace
             </Link>
           </nav>
           <div className="flex items-center gap-4">

@@ -11,7 +11,32 @@ Used fields:
 - `bootstrap_state` (text)
 - `bootstrap_started_at` (timestamptz, nullable)
 - `bootstrapped_at` (timestamptz, nullable)
+- `active_household_id` (uuid, nullable; FK → `households.id`)
 - `created_at` (timestamptz)
+
+### `households`
+
+Used fields:
+- `id` (uuid)
+- `created_by` (uuid, nullable; FK → `auth.users.id`)
+- `created_at` (timestamptz)
+
+### `household_members`
+
+Used fields:
+- `household_id` (uuid, FK → `households.id`)
+- `user_id` (uuid, FK → `auth.users.id`)
+- `created_at` (timestamptz)
+
+### `household_invites`
+
+Used fields:
+- `household_id` (uuid, FK → `households.id`)
+- `created_by` (uuid, nullable; FK → `auth.users.id`)
+- `token_hash` (bytea; raw token is never stored)
+- `expires_at` (timestamptz)
+- `used_at` (timestamptz, nullable)
+- `used_by` (uuid, nullable; FK → `auth.users.id`)
 
 ### `lists`
 
@@ -58,24 +83,9 @@ Used fields:
 
 ### Household scoping
 
-Goal: all user data is scoped to a “household”.
+Household scoping is implemented (Phase 1–3).
 
-Phase 1 (MVP): household as the primary scope
-
-- Every user gets a “personal household” (household of 1) automatically on first login.
-- Adding another user to your household shares all of the household’s data (lists + dates).
-- No roles/permissions in MVP: all household members can read/write.
-
-Tables:
-- `households`
-- `household_members`
-
-Data changes:
-- `lists` gains `household_id`
-- `important_dates` gains `household_id`
-- `list_items` remains scoped via its parent `lists` row (no `household_id` column needed)
-
-Phase 2 (later): personal vs household visibility
-
-- Add a per-row visibility toggle for `lists` / `important_dates` so users can keep some data private.
-- Exact default and UI is intentionally deferred until after Phase 1 lands.
+Likely follow-ups:
+- Household naming (`households.name`) once profiles have names.
+- Roles/permissions (owners/admin actions like removing members).
+- A nicer “workspace switcher” UX in the header (UI term).

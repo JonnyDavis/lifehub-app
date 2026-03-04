@@ -8,18 +8,15 @@ This file is intentionally short; it’s meant to keep “what’s happening” 
 - Finish dates feature MVP (backed by Supabase, not placeholder UI).
 - Add strict per-user RLS scoping for lists + dates.
 - Bootstrap default data per user (first `/dashboard` load).
+- Households: invites + active household switching.
+- Visibility: personal vs household scope for lists/dates.
 
 ## Next
 
-- Add household scoping (Phase 1 MVP):
-  - Every user gets a “personal household” (household of 1) on first login.
-  - `lists` + `important_dates` become household-scoped; `list_items` stays scoped via parent list.
-  - All household members have full read/write access (no roles yet).
 - Improve server action validation + user-facing error states.
 
 ## Later
 
-- Invites / multiple household support.
-- Personal vs household visibility (per-list/per-date toggle).
+- Household naming + profile fields.
 - Better list UX (inline editing, ordering, mobile interactions).
 - Basic test coverage (component + integration; E2E later).

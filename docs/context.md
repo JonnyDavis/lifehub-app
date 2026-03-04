@@ -30,14 +30,19 @@ When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`):
 - `/dashboard/lists` – lists index
 - `/dashboard/lists/[id]` – list detail + items
 - `/dashboard/dates` – important dates (add + view + edit + delete)
+- `/dashboard/household` – workspace switcher + invite link generation (UI term: “Workspace”)
+
+### Household join (protected)
+
+- `/household/join` – accept an invite token and join a household
 
 `/dashboard/*` is protected in `src/app/dashboard/layout.tsx` via `supabase.auth.getClaims()`.
 
 #### Protected routes + session refresh (Next.js Proxy)
 
 - This app uses Next.js “Proxy” at `src/proxy.ts` to keep Supabase auth cookies in sync (refresh token rotation).
-- Redirects for unauthenticated users are handled in `src/lib/supabase/proxy.ts` and are currently enforced for `/dashboard/*`.
-- If you add new protected route prefixes outside `/dashboard`, update both:
+- Redirects for unauthenticated users are handled in `src/lib/supabase/proxy.ts` and are currently enforced for `/dashboard/*` and `/household/*`.
+- If you add new protected route prefixes, update both:
   - `src/lib/supabase/proxy.ts` (`isProtectedRoute`)
   - `src/proxy.ts` (`config.matcher`)
 
@@ -49,10 +54,13 @@ When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`):
 - Important dates are stored in Supabase table `important_dates`.
 - Households are represented by `households` and `household_members`.
 - RLS enforces per-household data access (rows are scoped to a household, and access is granted via membership).
-  - `lists` and `important_dates` have a `household_id` column (defaulting to the current user’s household).
-  - `list_items` is scoped via its parent `lists` row.
-  - `lists.user_id` / `important_dates.user_id` currently exist but are treated as “created by” (not the primary access scope).
-  - `lists.scope` / `important_dates.scope` control whether a row is `personal` (owner-only) or `household` (shared).
+- `lists` and `important_dates` have a `household_id` column (defaulting to the current user’s household).
+- `list_items` is scoped via its parent `lists` row.
+- `lists.user_id` / `important_dates.user_id` currently exist but are treated as “created by” (not the primary access scope).
+- `lists.scope` / `important_dates.scope` control whether a row is `personal` (owner-only) or `household` (shared).
+- Phase 3+ workspace model:
+  - `profiles.active_household_id` selects the current workspace.
+  - RLS policies for lists/dates/items scope access to `public.current_household_id()` (the active workspace), not “any household you belong to”.
 - On first `/dashboard` load for a new user, the app:
   - ensures they have a “personal household” (household of 1)
   - bootstraps a small default dataset (lists, items, dates) into that household
@@ -74,8 +82,10 @@ When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`):
 ## Known gaps / TODOs (important)
 
 - Household scoping is implemented as a Phase 1 MVP:
-  - One household per user (“personal household”) for now.
-  - No invites / adding other members yet.
+- Phase 3 households:
+  - Users can belong to multiple households.
+  - `profiles.active_household_id` selects the current household for queries and inserts.
+  - Invite links allow adding other members to a household.
 - Phase 2 visibility (implemented):
   - Lists and dates can be marked as `personal` or `household`.
   - Defaults are privacy-first: personal when solo; household when shared.
@@ -85,6 +95,8 @@ When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`):
   - RLS should remain deny-by-default; if we add public access, it should be narrow `anon` read-only access to demo-only data (e.g. separate demo tables or a dedicated demo household), not “`household_id IS NULL` means public”.
 - Validation is mostly manual (no Zod yet), and error handling is minimal in server actions.
 - No automated tests yet.
+- Bootstrapping defaults are still tracked per-user (`profiles.bootstrap_state`), not per-household.
+  - This is good enough for now, but will likely need revisiting once users regularly switch between multiple households.
 - Important date & List create flows could do with reworking slightly.
   - Redirect to created list to populate list items, instead of staying on `/dashboard/lists`.
   - Created dates that don't meet the `upcoming` criteria should instigate a redirect to a visible tab that includes that date e.g. `past`. Important for positive user feedback.
