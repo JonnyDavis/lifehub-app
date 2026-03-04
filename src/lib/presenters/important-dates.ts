@@ -45,7 +45,10 @@ export function importantDateCategoryBadgeClass(
  * - UI can render from the returned plain JS object
  */
 export function presentImportantDate(
-  date: Pick<ImportantDate, "id" | "title" | "date" | "notes" | "category">,
+  date: Pick<
+    ImportantDate,
+    "id" | "title" | "date" | "notes" | "category" | "scope"
+  >,
 ): ImportantDateView {
   return {
     id: date.id,
@@ -53,5 +56,6 @@ export function presentImportantDate(
     date: date.date,
     notes: date.notes,
     category: normalizeImportantDateCategory(date.category),
+    scope: date.scope,
   };
 }

@@ -7,6 +7,7 @@ import { formatImportantDateLabel } from "@/lib/format/date";
 import { ImportantDateCategoryBadge } from "@/components/important-date-category-badge";
 import { ListCategoryBadge } from "@/components/list-category-badge";
 import { ListAvatar } from "@/components/list-avatar";
+import { VisibilityScopeBadge } from "@/components/visibility-scope-badge";
 import { getLists } from "@/lib/queries/lists";
 import { getUpcomingImportantDates } from "@/lib/queries/important-dates";
 
@@ -40,7 +41,7 @@ export default async function Page() {
       </section>
       <div className="grid md:grid-cols-2 gap-6">
         <section
-          className="bg-gray-300 p-4 rounded text-black"
+          className="bg-gray-200 p-4 rounded text-black"
           aria-labelledby="lists-heading"
         >
           <header className="flex items-center justify-between mb-4">
@@ -64,7 +65,7 @@ export default async function Page() {
                 <li key={list.id}>
                   <Link
                     href={`/dashboard/lists/${list.id}`}
-                    className="flex gap-4 bg-gray-200 p-4 rounded text-black"
+                    className="flex gap-4 bg-gray-300 p-4 rounded text-black"
                   >
                     <ListAvatar avatar={list.avatar} />
                     <div className="min-w-0">
@@ -75,6 +76,7 @@ export default async function Page() {
                         {list.badgeCategory ? (
                           <ListCategoryBadge category={list.badgeCategory} />
                         ) : null}
+                        <VisibilityScopeBadge scope={list.scope} />
                       </div>
                     </div>
                   </Link>
@@ -121,6 +123,7 @@ export default async function Page() {
                           {dateView.title}
                         </span>
                         <ImportantDateCategoryBadge category={category} />
+                        <VisibilityScopeBadge scope={dateView.scope} />
                       </span>
                       <span className="text-sm text-gray-700 whitespace-nowrap">
                         {formatImportantDateLabel(dateView.date)}

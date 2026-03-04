@@ -22,6 +22,8 @@ Used fields (based on queries/actions):
 - `icon` (text, nullable)
 - `seed_key` (text, nullable; internal for bootstrapped defaults)
 - `user_id` (uuid, FK → `auth.users.id`, default = `auth.uid()`)
+- `household_id` (uuid, FK → `households.id`, default = current household)
+- `scope` (text; `personal` or `household`)
 - `created_at` (timestamptz)
 
 ### `list_items`
@@ -48,6 +50,8 @@ Used fields:
 - `notes` (text, nullable)
 - `seed_key` (text, nullable; internal for bootstrapped defaults)
 - `user_id` (uuid, FK → `auth.users.id`, default = `auth.uid()`)
+- `household_id` (uuid, FK → `households.id`, default = current household)
+- `scope` (text; `personal` or `household`)
 - `created_at` (timestamptz)
 
 ## Planned (not fully implemented yet)

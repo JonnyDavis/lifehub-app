@@ -7,22 +7,27 @@ import {
 } from "@/lib/format/date";
 import { presentImportantDate } from "@/lib/presenters/important-dates";
 import { ImportantDateCategoryBadge } from "@/components/important-date-category-badge";
+import { VisibilityScopeBadge } from "@/components/visibility-scope-badge";
 import type {
   ImportantDate,
   ImportantDatesView,
   ImportantDateView,
 } from "@/types/important-dates";
 import { EditImportantDateForm } from "@/app/dashboard/dates/_components/EditImportantDateForm";
+import type { VisibilityFilter } from "@/types/visibility";
 
 function ViewImportantDateCard({
   date,
   selectedView,
+  selectedScope,
 }: {
   date: ImportantDateView;
   selectedView: ImportantDatesView;
+  selectedScope: VisibilityFilter;
 }) {
   const category = date.category;
   const anchorId = `date-${date.id}`;
+  const scopeQuery = selectedScope === "all" ? "" : `&scope=${selectedScope}`;
 
   return (
     <li id={anchorId} className="bg-gray-300 p-3 rounded scroll-mt-24">
@@ -31,6 +36,7 @@ function ViewImportantDateCard({
           <div className="flex items-center gap-2 min-w-0">
             <div className="font-medium truncate">{date.title}</div>
             <ImportantDateCategoryBadge category={category} />
+            <VisibilityScopeBadge scope={date.scope} />
           </div>
           <div className="text-sm text-gray-700">
             {formatImportantDateLabel(date.date)}
@@ -44,7 +50,7 @@ function ViewImportantDateCard({
         </div>
         <div className="flex flex-col items-end gap-2 shrink-0">
           <Link
-            href={`/dashboard/dates?view=${selectedView}&edit=${date.id}#${anchorId}`}
+            href={`/dashboard/dates?view=${selectedView}${scopeQuery}&edit=${date.id}#${anchorId}`}
             className="text-sm text-blue-600 hover:underline"
             scroll={false}
           >
@@ -68,12 +74,14 @@ function ViewImportantDateCard({
 export function ImportantDatesList({
   dates,
   selectedView,
+  selectedScope,
   editingId,
   title,
   emptyMessage,
 }: {
   dates: ImportantDate[];
   selectedView: ImportantDatesView;
+  selectedScope: VisibilityFilter;
   editingId?: string;
   title: string;
   emptyMessage: string;
@@ -100,6 +108,7 @@ export function ImportantDatesList({
                     <EditImportantDateForm
                       date={d}
                       selectedView={selectedView}
+                      selectedScope={selectedScope}
                     />
                     <form action={deleteImportantDate} className="flex justify-end">
                       <input type="hidden" name="id" value={d.id} />
@@ -114,7 +123,12 @@ export function ImportantDatesList({
                 </li>
               );
             })() : (
-              <ViewImportantDateCard key={d.id} date={d} selectedView={selectedView} />
+              <ViewImportantDateCard
+                key={d.id}
+                date={d}
+                selectedView={selectedView}
+                selectedScope={selectedScope}
+              />
             ),
           )}
         </ul>

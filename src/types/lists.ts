@@ -1,5 +1,7 @@
 // Type definitions for lists
 
+import type { VisibilityScope } from "@/types/visibility";
+
 export const LIST_CATEGORIES = [
   "shopping",
   "chores",
@@ -31,6 +33,7 @@ export type List = {
   title: string;
   icon: string | null;
   category: string | null;
+  scope: VisibilityScope;
 };
 
 export type ListAvatarView =
@@ -43,6 +46,7 @@ export type ListView = {
   badgeCategory: ListCategory | null;
   editorCategory: ListCategory;
   editorIconKey: ListIconKey | null;
+  scope: VisibilityScope;
   avatar: ListAvatarView;
 };
 

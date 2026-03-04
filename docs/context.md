@@ -52,6 +52,7 @@ When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`):
   - `lists` and `important_dates` have a `household_id` column (defaulting to the current user’s household).
   - `list_items` is scoped via its parent `lists` row.
   - `lists.user_id` / `important_dates.user_id` currently exist but are treated as “created by” (not the primary access scope).
+  - `lists.scope` / `important_dates.scope` control whether a row is `personal` (owner-only) or `household` (shared).
 - On first `/dashboard` load for a new user, the app:
   - ensures they have a “personal household” (household of 1)
   - bootstraps a small default dataset (lists, items, dates) into that household
@@ -75,7 +76,10 @@ When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`):
 - Household scoping is implemented as a Phase 1 MVP:
   - One household per user (“personal household”) for now.
   - No invites / adding other members yet.
-  - No “personal vs household” visibility toggle yet.
+- Phase 2 visibility (implemented):
+  - Lists and dates can be marked as `personal` or `household`.
+  - Defaults are privacy-first: personal when solo; household when shared.
+  - Existing rows are treated as `personal` to avoid accidental sharing when households gain new members.
 - (Future) Public demo mode: logged-out users can view a default dataset, and can “edit” in the UI, but saving requires creating/logging into an account.
   - Draft edits for logged-out users should stay client-side (in-memory / local storage) and be imported into the user’s household on signup/login.
   - RLS should remain deny-by-default; if we add public access, it should be narrow `anon` read-only access to demo-only data (e.g. separate demo tables or a dedicated demo household), not “`household_id IS NULL` means public”.

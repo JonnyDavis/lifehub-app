@@ -4,6 +4,7 @@ import {
   UPCOMING_IMPORTANT_DATES_SELECT,
   importantDatesTable,
 } from "@/lib/supabase/tables";
+import { normalizeVisibilityFilter, type VisibilityFilter } from "@/types/visibility";
 import type {
   ImportantDate,
   ImportantDatesView,
@@ -63,11 +64,19 @@ export async function getUpcomingImportantDates(limit = 4) {
 }
 
 // This function is more complex because it needs to support multiple views with different filtering and sorting logic.
-export async function getImportantDatesForView(view: ImportantDatesView) {
+export async function getImportantDatesForView(
+  view: ImportantDatesView,
+  scope: VisibilityFilter = "all",
+) {
   const supabase = await createClient();
   const today = todayISODate();
+  const cleanScope = normalizeVisibilityFilter(scope);
 
   let query = importantDatesTable(supabase).select(IMPORTANT_DATES_SELECT);
+
+  if (cleanScope !== "all") {
+    query = query.eq("scope", cleanScope);
+  }
 
   if (view === "upcoming") {
     query = query.gte("date", today);

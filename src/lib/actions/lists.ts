@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeListCategory } from "@/lib/presenters/lists";
 import { normalizeListIconKey } from "@/lib/presenters/lists";
+import { normalizeVisibilityFilter, normalizeVisibilityScope } from "@/types/visibility";
 import type { ListIconKey } from "@/types/lists";
 import { listItemsTable, listsTable } from "@/lib/supabase/tables";
 
@@ -53,6 +54,8 @@ export async function createList(formData: FormData) {
   const supabase = await createClient();
   const cleanTitle = getRequiredTrimmedString(formData, "title");
   const category = formData.get("category");
+  const scope = formData.get("scope");
+  const scopeFilter = formData.get("scopeFilter");
 
   if (!cleanTitle) {
     // TODO - handle this error properly in the UI
@@ -60,10 +63,13 @@ export async function createList(formData: FormData) {
   }
 
   const cleanCategory = parseListCategoryWithDefault(category);
+  const cleanScope = normalizeVisibilityScope(scope);
+  const cleanScopeFilter = normalizeVisibilityFilter(scopeFilter);
 
   const { error } = await listsTable(supabase).insert({
     title: cleanTitle,
     category: cleanCategory,
+    ...(cleanScope ? { scope: cleanScope } : {}),
     // missing icon for now
   });
 
@@ -77,7 +83,11 @@ export async function createList(formData: FormData) {
   revalidatePath("/dashboard/lists");
   revalidatePath("/dashboard");
 
-  redirect("/dashboard/lists");
+  redirect(
+    cleanScopeFilter === "all"
+      ? "/dashboard/lists"
+      : `/dashboard/lists?scope=${cleanScopeFilter}`,
+  );
 }
 
 export async function createListItem(formData: FormData) {
@@ -182,6 +192,7 @@ export async function updateList(formData: FormData) {
   const cleanTitle = getRequiredTrimmedString(formData, "title");
   const category = formData.get("category");
   const icon = formData.get("icon");
+  const scope = formData.get("scope");
 
   if (!listId) {
     console.error("Missing or invalid listId in updateList");
@@ -193,6 +204,7 @@ export async function updateList(formData: FormData) {
   }
 
   const cleanCategory = parseListCategoryWithDefault(category);
+  const cleanScope = normalizeVisibilityScope(scope);
 
   const { ok: iconOk, nextIcon } = parseListIconForUpdate(icon);
   if (!iconOk) {
@@ -204,6 +216,7 @@ export async function updateList(formData: FormData) {
       title: cleanTitle,
       category: cleanCategory,
       icon: nextIcon,
+      ...(cleanScope ? { scope: cleanScope } : {}),
     })
     .eq("id", listId);
 
