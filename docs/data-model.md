@@ -56,8 +56,22 @@ Used fields:
 
 Goal: all user data is scoped to a “household”.
 
-Potential tables:
+Phase 1 (MVP): household as the primary scope
+
+- Every user gets a “personal household” (household of 1) automatically on first login.
+- Adding another user to your household shares all of the household’s data (lists + dates).
+- No roles/permissions in MVP: all household members can read/write.
+
+Tables:
 - `households`
 - `household_members`
 
-Follow-up: once household scoping exists, `lists` / `important_dates` gain a `household_id`.
+Data changes:
+- `lists` gains `household_id`
+- `important_dates` gains `household_id`
+- `list_items` remains scoped via its parent `lists` row (no `household_id` column needed)
+
+Phase 2 (later): personal vs household visibility
+
+- Add a per-row visibility toggle for `lists` / `important_dates` so users can keep some data private.
+- Exact default and UI is intentionally deferred until after Phase 1 lands.
