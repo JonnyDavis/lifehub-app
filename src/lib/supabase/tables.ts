@@ -12,6 +12,14 @@ export function profilesTable(supabase: SupabaseClient) {
   return supabase.from("profiles");
 }
 
+export function householdsTable(supabase: SupabaseClient) {
+  return supabase.from("households");
+}
+
+export function householdMembersTable(supabase: SupabaseClient) {
+  return supabase.from("household_members");
+}
+
 export function listsTable(supabase: SupabaseClient) {
   return supabase.from("lists");
 }

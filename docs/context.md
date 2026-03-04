@@ -47,10 +47,14 @@ When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`):
 - Server-side auth reads/writes cookies via `@supabase/ssr` (`src/lib/supabase/server.ts`).
 - Lists + list items are stored in Supabase tables `lists` and `list_items`.
 - Important dates are stored in Supabase table `important_dates`.
-- RLS enforces per-user data access (rows are scoped to the authenticated user via `user_id = auth.uid()`).
-  - `lists` and `important_dates` have a `user_id` column with `DEFAULT auth.uid()`.
+- Households are represented by `households` and `household_members`.
+- RLS enforces per-household data access (rows are scoped to a household, and access is granted via membership).
+  - `lists` and `important_dates` have a `household_id` column (defaulting to the current user’s household).
   - `list_items` is scoped via its parent `lists` row.
-- On first `/dashboard` load for a new user, the app bootstraps a small default dataset (lists, items, dates) owned by that user.
+  - `lists.user_id` / `important_dates.user_id` currently exist but are treated as “created by” (not the primary access scope).
+- On first `/dashboard` load for a new user, the app:
+  - ensures they have a “personal household” (household of 1)
+  - bootstraps a small default dataset (lists, items, dates) into that household
 - Current lists queries/actions use the Supabase server client from `src/lib/supabase/server.ts`.
   - `lists` includes an optional `category` column (used for list “type”/category).
 
@@ -68,8 +72,10 @@ When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`):
 
 ## Known gaps / TODOs (important)
 
-- “Households” scoping is described in `docs/data-model.md` but is **not implemented** in code yet.
-- “Lists” and “Important dates” are not household-scoped yet.
+- Household scoping is implemented as a Phase 1 MVP:
+  - One household per user (“personal household”) for now.
+  - No invites / adding other members yet.
+  - No “personal vs household” visibility toggle yet.
 - (Future) Public demo mode: logged-out users can view a default dataset, and can “edit” in the UI, but saving requires creating/logging into an account.
   - Draft edits for logged-out users should stay client-side (in-memory / local storage) and be imported into the user’s household on signup/login.
   - RLS should remain deny-by-default; if we add public access, it should be narrow `anon` read-only access to demo-only data (e.g. separate demo tables or a dedicated demo household), not “`household_id IS NULL` means public”.
