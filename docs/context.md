@@ -4,8 +4,8 @@
 
 LifeHub is a small “life admin” app for a household:
 
-- lists (household sharing planned) (e.g. groceries / tasks)
-- important dates
+- lists (personal + shared workspace scopes) (e.g. groceries / tasks)
+- important dates (personal + shared workspace scopes)
 
 This repo is also intended as a portfolio project: keep patterns clean and easy to explain.
 
@@ -53,6 +53,7 @@ When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`):
 - Lists + list items are stored in Supabase tables `lists` and `list_items`.
 - Important dates are stored in Supabase table `important_dates`.
 - Households are represented by `households` and `household_members`.
+- The database and route names still use `household`; the UI uses “Workspace” for the currently selected household context.
 - RLS enforces per-household data access (rows are scoped to a household, and access is granted via membership).
 - `lists` and `important_dates` have a `household_id` column (defaulting to the current user’s household).
 - `list_items` is scoped via its parent `lists` row.
@@ -61,6 +62,7 @@ When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`):
 - Phase 3+ workspace model:
   - `profiles.active_household_id` selects the current workspace.
   - RLS policies for lists/dates/items scope access to `public.current_household_id()` (the active workspace), not “any household you belong to”.
+  - “Personal” content is personal within the active workspace, not a global user-level space across all workspaces.
 - On first `/dashboard` load for a new user, the app:
   - ensures they have a “personal household” (household of 1)
   - bootstraps a small default dataset (lists, items, dates) into that household
@@ -81,15 +83,17 @@ When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`):
 
 ## Known gaps / TODOs (important)
 
-- Household scoping is implemented as a Phase 1 MVP:
-- Phase 3 households:
+- Household/workspace support is implemented through Phase 3:
   - Users can belong to multiple households.
-  - `profiles.active_household_id` selects the current household for queries and inserts.
+  - `profiles.active_household_id` selects the current household/workspace for reads and inserts.
   - Invite links allow adding other members to a household.
+  - The UI says “Workspace”, but schema and route names still say `household`.
 - Phase 2 visibility (implemented):
   - Lists and dates can be marked as `personal` or `household`.
   - Defaults are privacy-first: personal when solo; household when shared.
   - Existing rows are treated as `personal` to avoid accidental sharing when households gain new members.
+- Roles/permissions are not implemented yet; all workspace members currently have full write access.
+- Household naming is not implemented yet; labels are inferred from creator + member count.
 - (Future) Public demo mode: logged-out users can view a default dataset, and can “edit” in the UI, but saving requires creating/logging into an account.
   - Draft edits for logged-out users should stay client-side (in-memory / local storage) and be imported into the user’s household on signup/login.
   - RLS should remain deny-by-default; if we add public access, it should be narrow `anon` read-only access to demo-only data (e.g. separate demo tables or a dedicated demo household), not “`household_id IS NULL` means public”.
