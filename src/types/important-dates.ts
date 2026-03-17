@@ -1,3 +1,5 @@
+import type { VisibilityScope } from "@/types/visibility";
+
 export const IMPORTANT_DATE_CATEGORIES = [
   "deadline",
   "renewal",
@@ -17,6 +19,7 @@ export type ImportantDate = {
   notes: string | null;
   category: ImportantDateCategory;
   created_at: string;
+  scope: VisibilityScope;
 };
 
 export type UpcomingImportantDate = Omit<ImportantDate, "created_at">;

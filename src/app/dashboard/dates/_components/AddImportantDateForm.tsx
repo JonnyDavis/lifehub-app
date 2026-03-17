@@ -1,8 +1,36 @@
 import { createImportantDate } from "@/lib/actions/important-dates";
 import { importantDateCategoryLabel } from "@/lib/presenters/important-dates";
 import { IMPORTANT_DATE_CATEGORIES } from "@/types/important-dates";
+import {
+  VISIBILITY_SCOPES,
+  normalizeVisibilityScope,
+  type VisibilityFilter,
+} from "@/types/visibility";
+import { createClient } from "@/lib/supabase/server";
 
-export function AddImportantDateForm() {
+export async function AddImportantDateForm({
+  defaultScope,
+}: {
+  defaultScope: VisibilityFilter;
+}) {
+  const scopeFromFilter =
+    defaultScope === "personal" || defaultScope === "household"
+      ? defaultScope
+      : null;
+
+  const scopeFromDb = scopeFromFilter
+    ? null
+    : await (async () => {
+        const supabase = await createClient();
+        const { data, error } = await supabase.rpc(
+          "default_scope_for_current_user",
+        );
+        if (error) return null;
+        return normalizeVisibilityScope(data);
+      })();
+
+  const initialScope = scopeFromFilter ?? scopeFromDb ?? "personal";
+
   return (
     <section className="bg-gray-100 p-4 rounded mb-6">
       <h2 className="text-lg text-black font-semibold mb-3">Add a date</h2>
@@ -53,6 +81,24 @@ export function AddImportantDateForm() {
         </div>
 
         <div>
+          <label htmlFor="scope" className="sr-only">
+            Visibility
+          </label>
+          <select
+            id="scope"
+            name="scope"
+            className="w-full rounded border border-gray-300 px-3 py-2 text-sm text-black"
+            defaultValue={initialScope}
+          >
+            {VISIBILITY_SCOPES.map((s) => (
+              <option key={s} value={s}>
+                {s === "personal" ? "Personal" : "Household"}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
           <label htmlFor="notes" className="sr-only">
             Notes
           </label>
@@ -77,4 +123,3 @@ export function AddImportantDateForm() {
     </section>
   );
 }
-

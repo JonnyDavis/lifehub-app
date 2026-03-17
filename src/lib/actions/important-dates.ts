@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeImportantDateCategory } from "@/lib/presenters/important-dates";
 import { normalizeImportantDatesView } from "@/types/important-dates";
+import { normalizeVisibilityFilter, normalizeVisibilityScope } from "@/types/visibility";
 import { importantDatesTable } from "@/lib/supabase/tables";
 
 function getRequiredTrimmedString(
@@ -54,18 +55,21 @@ export async function createImportantDate(formData: FormData) {
   const cleanDate = getRequiredTrimmedString(formData, "date");
   const cleanNotes = getOptionalTrimmedString(formData, "notes");
   const category = formData.get("category");
+  const scope = formData.get("scope");
 
   if (!cleanTitle || !cleanDate) {
     return;
   }
 
   const cleanCategory = normalizeImportantDateCategory(category);
+  const cleanScope = normalizeVisibilityScope(scope);
 
   const { error } = await importantDatesTable(supabase).insert({
     title: cleanTitle,
     date: cleanDate,
     notes: cleanNotes,
     category: cleanCategory,
+    ...(cleanScope ? { scope: cleanScope } : {}),
   });
 
   if (error) {
@@ -86,6 +90,8 @@ export async function updateImportantDate(formData: FormData) {
   const cleanNotes = getOptionalTrimmedString(formData, "notes");
   const category = formData.get("category");
   const view = formData.get("view");
+  const scope = formData.get("scope");
+  const scopeFilter = formData.get("scopeFilter");
 
   if (!id) {
     console.error("Missing or invalid id in updateImportantDate");
@@ -98,6 +104,8 @@ export async function updateImportantDate(formData: FormData) {
 
   const cleanCategory = normalizeImportantDateCategory(category);
   const cleanView = normalizeImportantDatesView(view);
+  const cleanScope = normalizeVisibilityScope(scope);
+  const cleanScopeFilter = normalizeVisibilityFilter(scopeFilter);
 
   const { error } = await importantDatesTable(supabase)
     .update({
@@ -105,6 +113,7 @@ export async function updateImportantDate(formData: FormData) {
       date: cleanDate,
       notes: cleanNotes,
       category: cleanCategory,
+      ...(cleanScope ? { scope: cleanScope } : {}),
     })
     .eq("id", id);
 
@@ -143,7 +152,9 @@ export async function updateImportantDate(formData: FormData) {
         ? "upcoming"
         : "past";
 
-  redirect(`/dashboard/dates?view=${targetView}#date-${id}`);
+  const scopeQuery =
+    cleanScopeFilter === "all" ? "" : `&scope=${cleanScopeFilter}`;
+  redirect(`/dashboard/dates?view=${targetView}${scopeQuery}#date-${id}`);
 }
 
 export async function deleteImportantDate(formData: FormData) {

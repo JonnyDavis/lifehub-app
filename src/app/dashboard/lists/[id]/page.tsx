@@ -8,6 +8,7 @@ import { presentList, splitListItemsByDone } from "@/lib/presenters/lists";
 import { ListCategoryBadge } from "@/components/list-category-badge";
 import { ListAvatar } from "@/components/list-avatar";
 import { EditListForm } from "@/app/dashboard/lists/_components/EditListForm";
+import { VisibilityScopeBadge } from "@/components/visibility-scope-badge";
 
 type ListPageProps = {
   params: Promise<{ id: string }>;
@@ -45,6 +46,7 @@ export default async function Page({ params }: ListPageProps) {
                 {listView.badgeCategory ? (
                   <ListCategoryBadge category={listView.badgeCategory} />
                 ) : null}
+                <VisibilityScopeBadge scope={listView.scope} />
               </div>
             </div>
           </div>

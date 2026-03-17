@@ -53,7 +53,7 @@ export function defaultListIconKey(category: ListCategory): ListIconKey {
  *   simply read `listView.title`, `listView.badgeCategory`, `listView.avatar`, etc.
  */
 export function presentList(
-  list: Pick<List, "id" | "title" | "category" | "icon">,
+  list: Pick<List, "id" | "title" | "category" | "icon" | "scope">,
 ): ListView {
   // For display: only a valid/known category should show a badge or influence defaults.
   const badgeCategory = normalizeListCategory(list.category);
@@ -96,6 +96,7 @@ export function presentList(
     badgeCategory,
     editorCategory,
     editorIconKey,
+    scope: list.scope,
     avatar,
   };
 }

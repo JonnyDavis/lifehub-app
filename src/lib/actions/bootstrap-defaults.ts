@@ -4,7 +4,8 @@
 // for each *new* user on their first `/dashboard` load.
 //
 // Design goals:
-// - Strict RLS stays intact: rows are owned by `auth.uid()` (via DB defaults).
+// - Strict RLS stays intact: rows are household-scoped, and access is enforced
+//   by household membership (via DB defaults + RLS policies).
 // - Idempotent: safe if this runs multiple times (refresh/multi-tab).
 // - Race-tolerant: only one request "wins" the bootstrap for a user.
 // - Keep the code easy to follow: seeded rows get stable `seed_key`s, enforced
@@ -38,40 +39,40 @@ type DefaultListSeedKey =
   | "work-admin"
   | "errands";
 
-// Mirrors `supabase/seed.default.sql`, but assigns per-user `seed_key`s so we can
+// Mirrors `supabase/seed.default.sql`, but assigns per-household `seed_key`s so we can
 // insert defaults once without deterministic UUID generation.
-function getDefaultSeedData(userId: string) {
+function getDefaultSeedData(householdId: string) {
   const lists = [
     {
-      user_id: userId,
+      household_id: householdId,
       seed_key: "groceries" as const,
       title: "Groceries",
       category: "shopping",
       icon: "shopping-cart",
     },
     {
-      user_id: userId,
+      household_id: householdId,
       seed_key: "house-chores" as const,
       title: "House Chores",
       category: "chores",
       icon: null,
     },
     {
-      user_id: userId,
+      household_id: householdId,
       seed_key: "weekend-trip" as const,
       title: "Weekend Trip",
       category: "packing",
       icon: "✈️",
     },
     {
-      user_id: userId,
+      household_id: householdId,
       seed_key: "work-admin" as const,
       title: "Work Admin",
       category: "other",
       icon: "WFH",
     },
     {
-      user_id: userId,
+      household_id: householdId,
       seed_key: "errands" as const,
       title: "Errands",
       category: "errands",
@@ -175,7 +176,7 @@ function getDefaultSeedData(userId: string) {
 
   const importantDates = [
     {
-      user_id: userId,
+      household_id: householdId,
       seed_key: "dentist",
       title: "Dentist",
       date: isoDateAddDaysUTC(10),
@@ -183,7 +184,7 @@ function getDefaultSeedData(userId: string) {
       category: "appointment",
     },
     {
-      user_id: userId,
+      household_id: householdId,
       seed_key: "pay-rent",
       title: "Pay rent",
       date: isoDateAddDaysUTC(1),
@@ -191,7 +192,7 @@ function getDefaultSeedData(userId: string) {
       category: "deadline",
     },
     {
-      user_id: userId,
+      household_id: householdId,
       seed_key: "alex-birthday",
       title: "Alex birthday",
       date: isoDateAddDaysUTC(-14),
@@ -199,7 +200,7 @@ function getDefaultSeedData(userId: string) {
       category: "birthday",
     },
     {
-      user_id: userId,
+      household_id: householdId,
       seed_key: "concert-tickets",
       title: "Concert tickets",
       date: isoDateAddDaysUTC(60),
@@ -207,7 +208,7 @@ function getDefaultSeedData(userId: string) {
       category: "event",
     },
     {
-      user_id: userId,
+      household_id: householdId,
       seed_key: "passport-renewal",
       title: "Passport renewal",
       date: isoDateAddDaysUTC(180),
@@ -235,6 +236,16 @@ export async function ensureUserBootstrappedDefaults(
   }
 
   const userId = userData.user.id;
+
+  // Ensure the user has a personal household (Phase 1 MVP: one household per user).
+  const { data: householdId, error: householdError } = await supabase.rpc(
+    "ensure_personal_household",
+  );
+
+  if (householdError || !householdId) {
+    console.error("Error ensuring personal household:", householdError);
+    return;
+  }
 
   // Ensure the per-user `profiles` row exists (used as the bootstrap "lock"/state).
   const { error: ensureProfileError } = await profilesTable(supabase).upsert(
@@ -310,11 +321,15 @@ export async function ensureUserBootstrappedDefaults(
       supabase,
     )
       .select("id")
+      .eq("household_id", householdId)
       .limit(1);
     if (existingListsError) throw existingListsError;
 
     const { data: existingDates, error: existingDatesError } =
-      await importantDatesTable(supabase).select("id").limit(1);
+      await importantDatesTable(supabase)
+        .select("id")
+        .eq("household_id", householdId)
+        .limit(1);
     if (existingDatesError) throw existingDatesError;
 
     if ((existingLists ?? []).length > 0 || (existingDates ?? []).length > 0) {
@@ -334,11 +349,11 @@ export async function ensureUserBootstrappedDefaults(
     }
 
     const { lists, listSeedKeys, listItems, importantDates } =
-      getDefaultSeedData(userId);
+      getDefaultSeedData(householdId);
 
     // Insert-if-missing for seeded rows (avoid overwriting any user edits).
     const { error: listsError } = await listsTable(supabase).upsert(lists, {
-      onConflict: "user_id,seed_key",
+      onConflict: "household_id,seed_key",
       ignoreDuplicates: true,
     });
     if (listsError) throw listsError;
@@ -347,7 +362,7 @@ export async function ensureUserBootstrappedDefaults(
       supabase,
     )
       .select("id, seed_key")
-      .eq("user_id", userId)
+      .eq("household_id", householdId)
       .in("seed_key", listSeedKeys);
     if (seededListsError) throw seededListsError;
 
@@ -385,7 +400,7 @@ export async function ensureUserBootstrappedDefaults(
 
     const { error: datesError } = await importantDatesTable(supabase).upsert(
       importantDates,
-      { onConflict: "user_id,seed_key", ignoreDuplicates: true },
+      { onConflict: "household_id,seed_key", ignoreDuplicates: true },
     );
     if (datesError) throw datesError;
 

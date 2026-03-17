@@ -7,6 +7,7 @@ import { LIST_CATEGORIES, LIST_ICON_KEYS } from "@/types/lists";
 import type { ListCategory, ListIconKey, ListView } from "@/types/lists";
 import { listCategoryLabel } from "@/lib/presenters/lists";
 import { ListIcon } from "@/components/list-icon";
+import { VISIBILITY_SCOPES, type VisibilityScope } from "@/types/visibility";
 
 export function EditListForm({
   list,
@@ -19,21 +20,25 @@ export function EditListForm({
   const initialTitle = list.title;
   const initialCategory = list.editorCategory;
   const initialIcon = list.editorIconKey;
+  const initialScope = list.scope;
 
   const [title, setTitle] = useState(list.title);
   const [category, setCategory] = useState<ListCategory>(initialCategory);
   const [icon, setIcon] = useState<ListIconKey | null>(initialIcon);
+  const [scope, setScope] = useState<VisibilityScope>(initialScope);
 
   const cleanTitle = title.trim();
   const isDirty =
     cleanTitle !== initialTitle.trim() ||
     category !== initialCategory ||
-    icon !== initialIcon;
+    icon !== initialIcon ||
+    scope !== initialScope;
 
   const openEditor = () => {
     setTitle(list.title);
     setCategory(initialCategory);
     setIcon(initialIcon);
+    setScope(initialScope);
     setIsOpen(true);
   };
 
@@ -46,6 +51,7 @@ export function EditListForm({
       formData.append("title", cleanTitle);
       formData.append("category", category);
       formData.append("icon", icon ?? "");
+      formData.append("scope", scope);
       await updateList(formData);
       setIsOpen(false);
     });
@@ -99,6 +105,26 @@ export function EditListForm({
                 {LIST_CATEGORIES.map((c) => (
                   <option key={c} value={c}>
                     {listCategoryLabel(c)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor={`list-scope-${list.id}`} className="text-sm">
+                Visibility
+              </label>
+              <select
+                id={`list-scope-${list.id}`}
+                name="scope"
+                value={scope}
+                onChange={(e) => setScope(e.target.value as VisibilityScope)}
+                disabled={isPending}
+                className="mt-1 w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-black disabled:opacity-60"
+              >
+                {VISIBILITY_SCOPES.map((s) => (
+                  <option key={s} value={s}>
+                    {s === "personal" ? "Personal" : "Household"}
                   </option>
                 ))}
               </select>

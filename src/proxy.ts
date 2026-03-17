@@ -10,5 +10,6 @@ export const config = {
     "/",
     "/auth/:path*",
     "/dashboard/:path*",
+    "/household/:path*",
   ],
 };

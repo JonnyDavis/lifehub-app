@@ -1,15 +1,23 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-export const LISTS_SELECT = "id, title, icon, category" as const;
+export const LISTS_SELECT = "id, title, icon, category, scope" as const;
 export const LIST_ITEMS_SELECT = "id, label, quantity, is_done, position" as const;
 
 export const IMPORTANT_DATES_SELECT =
-  "id, title, date, notes, category, created_at" as const;
+  "id, title, date, notes, category, created_at, scope" as const;
 export const UPCOMING_IMPORTANT_DATES_SELECT =
-  "id, title, date, notes, category" as const;
+  "id, title, date, notes, category, scope" as const;
 
 export function profilesTable(supabase: SupabaseClient) {
   return supabase.from("profiles");
+}
+
+export function householdsTable(supabase: SupabaseClient) {
+  return supabase.from("households");
+}
+
+export function householdMembersTable(supabase: SupabaseClient) {
+  return supabase.from("household_members");
 }
 
 export function listsTable(supabase: SupabaseClient) {

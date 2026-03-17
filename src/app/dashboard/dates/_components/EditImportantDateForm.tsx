@@ -12,13 +12,21 @@ import {
 import { IMPORTANT_DATE_CATEGORIES } from "@/types/important-dates";
 import type { ImportantDateView, ImportantDatesView } from "@/types/important-dates";
 import { importantDateCategoryLabel } from "@/lib/presenters/important-dates";
+import {
+  VISIBILITY_SCOPES,
+  type VisibilityFilter,
+  type VisibilityScope,
+} from "@/types/visibility";
+import { VisibilityScopeBadge } from "@/components/visibility-scope-badge";
 
 export function EditImportantDateForm({
   date,
   selectedView,
+  selectedScope,
 }: {
   date: ImportantDateView;
   selectedView: ImportantDatesView;
+  selectedScope: VisibilityFilter;
 }) {
   const [isPending, startTransition] = useTransition();
 
@@ -26,11 +34,13 @@ export function EditImportantDateForm({
   const initialDate = date.date;
   const initialNotes = date.notes ?? "";
   const initialCategory = date.category;
+  const initialScope = date.scope;
 
   const [title, setTitle] = useState(initialTitle);
   const [dateValue, setDateValue] = useState(initialDate);
   const [category, setCategory] = useState(initialCategory);
   const [notes, setNotes] = useState(initialNotes);
+  const [scope, setScope] = useState<VisibilityScope>(initialScope);
 
   const cleanTitle = title.trim();
   const cleanDate = dateValue.trim();
@@ -40,9 +50,11 @@ export function EditImportantDateForm({
     cleanTitle !== initialTitle.trim() ||
     cleanDate !== initialDate ||
     category !== initialCategory ||
-    cleanNotes !== initialNotes.trim();
+    cleanNotes !== initialNotes.trim() ||
+    scope !== initialScope;
 
   const anchorId = `date-${date.id}`;
+  const scopeQuery = selectedScope === "all" ? "" : `&scope=${selectedScope}`;
 
   const handleSave = () => {
     if (!isDirty || cleanTitle.length === 0 || cleanDate.length === 0) return;
@@ -51,10 +63,12 @@ export function EditImportantDateForm({
       const formData = new FormData();
       formData.append("id", date.id);
       formData.append("view", selectedView);
+      formData.append("scopeFilter", selectedScope);
       formData.append("title", cleanTitle);
       formData.append("date", cleanDate);
       formData.append("category", category);
       formData.append("notes", cleanNotes);
+      formData.append("scope", scope);
       await updateImportantDate(formData);
     });
   };
@@ -66,6 +80,7 @@ export function EditImportantDateForm({
           <div className="flex items-center gap-2 min-w-0">
             <div className="font-medium truncate">Editing</div>
             <ImportantDateCategoryBadge category={category} />
+            <VisibilityScopeBadge scope={scope} />
           </div>
           <div className="text-sm text-gray-700">
             {formatImportantDateLabel(cleanDate)}
@@ -75,7 +90,7 @@ export function EditImportantDateForm({
           </div>
         </div>
         <Link
-          href={`/dashboard/dates?view=${selectedView}#${anchorId}`}
+          href={`/dashboard/dates?view=${selectedView}${scopeQuery}#${anchorId}`}
           className="text-sm text-blue-600 hover:underline"
           scroll={false}
           aria-disabled={isPending}
@@ -146,6 +161,26 @@ export function EditImportantDateForm({
         </div>
 
         <div>
+          <label htmlFor={`scope-${date.id}`} className="sr-only">
+            Visibility
+          </label>
+          <select
+            id={`scope-${date.id}`}
+            name="scope"
+            value={scope}
+            onChange={(e) => setScope(e.target.value as VisibilityScope)}
+            disabled={isPending}
+            className="w-full rounded border border-gray-400 bg-white px-3 py-2 text-sm text-black shadow-sm disabled:opacity-60"
+          >
+            {VISIBILITY_SCOPES.map((s) => (
+              <option key={s} value={s}>
+                {s === "personal" ? "Personal" : "Household"}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
           <label htmlFor={`notes-${date.id}`} className="sr-only">
             Notes
           </label>
@@ -174,4 +209,3 @@ export function EditImportantDateForm({
     </>
   );
 }
-

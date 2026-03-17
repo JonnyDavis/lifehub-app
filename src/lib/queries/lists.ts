@@ -7,13 +7,21 @@ import {
   listItemsTable,
   listsTable,
 } from "@/lib/supabase/tables";
+import { normalizeVisibilityFilter, type VisibilityFilter } from "@/types/visibility";
 import type { List, ListItem } from "@/types/lists";
 
-export async function getLists() {
+export async function getLists(scope: VisibilityFilter = "all") {
   const supabase = await createClient();
-  const { data: lists, error } = await listsTable(supabase)
-    .select(LISTS_SELECT)
-    .order("created_at", { ascending: true });
+  const cleanScope = normalizeVisibilityFilter(scope);
+
+  let query = listsTable(supabase).select(LISTS_SELECT);
+  if (cleanScope !== "all") {
+    query = query.eq("scope", cleanScope);
+  }
+
+  const { data: lists, error } = await query.order("created_at", {
+    ascending: true,
+  });
 
   if (error) {
     console.error("Error fetching lists:", error);
