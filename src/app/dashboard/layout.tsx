@@ -51,26 +51,43 @@ export default async function Layout({
   return (
     <>
       <header className="bg-gray-800 text-white">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <hgroup>
-            <h1>LifeHub</h1>
-            <h2>Welcome to your dashboard</h2>
-          </hgroup>
-          <nav className="flex gap-4 text-sm">
-            <Link href="/dashboard" className="hover:underline">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-start justify-between gap-4 lg:flex-1 lg:items-center">
+            <hgroup>
+              <h1>LifeHub</h1>
+              <h2>Welcome to your dashboard</h2>
+            </hgroup>
+            <div className="lg:hidden">
+              <LogoutButton />
+            </div>
+          </div>
+          <nav className="flex flex-wrap gap-2 text-sm lg:justify-center">
+            <Link
+              href="/dashboard"
+              className="rounded bg-gray-700 px-3 py-2 hover:bg-gray-600"
+            >
               Overview
             </Link>
-            <Link href="/dashboard/lists" className="hover:underline">
+            <Link
+              href="/dashboard/lists"
+              className="rounded bg-gray-700 px-3 py-2 hover:bg-gray-600"
+            >
               Lists
             </Link>
-            <Link href="/dashboard/dates" className="hover:underline">
+            <Link
+              href="/dashboard/dates"
+              className="rounded bg-gray-700 px-3 py-2 hover:bg-gray-600"
+            >
               Dates
             </Link>
-            <Link href="/dashboard/household" className="hover:underline">
+            <Link
+              href="/dashboard/household"
+              className="rounded bg-gray-700 px-3 py-2 hover:bg-gray-600"
+            >
               Workspace
             </Link>
           </nav>
-          <div className="flex items-center gap-4">
+          <div className="hidden items-center gap-4 lg:flex">
             <LogoutButton />
           </div>
         </div>
