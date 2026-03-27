@@ -12,10 +12,12 @@ import { VisibilityScopeBadge } from "@/components/visibility-scope-badge";
 
 type ListPageProps = {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ created?: string }>;
 };
 
-export default async function Page({ params }: ListPageProps) {
+export default async function Page({ params, searchParams }: ListPageProps) {
   const { id } = await params;
+  const { created } = await searchParams;
 
   // Fetch the list details from Supabase
   const list = await requireListById(id);
@@ -35,6 +37,11 @@ export default async function Page({ params }: ListPageProps) {
         &larr; Back to Lists
       </Link>
       <article className="bg-gray-200 p-4 rounded text-black">
+        {created === "1" ? (
+          <section className="mb-4 rounded border border-green-200 bg-green-50 p-3 text-sm text-green-900">
+            List created. Add a few items to get it ready.
+          </section>
+        ) : null}
         <section className="flex items-start gap-4">
           <div className="flex gap-4 min-w-0">
             <ListAvatar avatar={listView.avatar} />

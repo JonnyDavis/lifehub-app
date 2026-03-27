@@ -11,21 +11,33 @@ import { VisibilityScopeBadge } from "@/components/visibility-scope-badge";
 import { normalizeVisibilityFilter } from "@/types/visibility";
 
 type ListsPageProps = {
-  searchParams: Promise<{ scope?: string }>;
+  searchParams: Promise<{ scope?: string; error?: string }>;
 };
 
 export default async function Page({ searchParams }: ListsPageProps) {
-  const { scope } = await searchParams;
+  const { scope, error } = await searchParams;
   const selectedScope = normalizeVisibilityFilter(scope);
 
   const lists = await getLists(selectedScope);
   const listViews = lists.map(presentList);
+  const createErrorMessage =
+    error === "missing_title"
+      ? "Add a list name before creating the list."
+      : error === "create_failed"
+        ? "We couldn't create that list. Please try again."
+        : null;
 
   return (
     <article>
       <h1 className="text-2xl font-bold mb-4">Your Lists</h1>
 
       <ListsScopeFilterNav selectedScope={selectedScope} />
+      {/* Create errors come back via query params so the form can stay server-driven. */}
+      {createErrorMessage ? (
+        <section className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-900">
+          {createErrorMessage}
+        </section>
+      ) : null}
       <CreateListForm defaultScope={selectedScope} />
 
       <section className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
