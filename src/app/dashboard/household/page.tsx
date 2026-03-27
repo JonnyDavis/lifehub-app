@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { InviteLinkActions } from "@/app/dashboard/household/_components/InviteLinkActions";
 import { createClient } from "@/lib/supabase/server";
 import { householdsTable, householdMembersTable, profilesTable } from "@/lib/supabase/tables";
 
@@ -113,7 +114,8 @@ export default async function Page({ searchParams }: HouseholdPageProps) {
     memberCountByHouseholdId.set(hid, (memberCountByHouseholdId.get(hid) ?? 0) + 1);
   }
 
-  const inviteJoinPath = token
+  // Keep the server-side value relative; the client resolves it against the active origin.
+  const invitePath = token
     ? `/household/join?token=${encodeURIComponent(token)}`
     : null;
 
@@ -140,15 +142,13 @@ export default async function Page({ searchParams }: HouseholdPageProps) {
         </section>
       ) : null}
 
-      {inviteJoinPath ? (
+      {invitePath ? (
         <section className="bg-gray-100 p-4 rounded">
           <h2 className="text-lg font-semibold text-black mb-2">Invite link</h2>
           <p className="text-sm text-gray-700 mb-3">
             Share this link with someone to let them join your active workspace.
           </p>
-          <code className="block w-full overflow-x-auto rounded bg-white border border-gray-300 px-3 py-2 text-sm text-black">
-            {inviteJoinPath}
-          </code>
+          <InviteLinkActions invitePath={invitePath} />
         </section>
       ) : null}
 

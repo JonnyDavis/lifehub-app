@@ -30,7 +30,7 @@ When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`):
 - `/dashboard/lists` – lists index
 - `/dashboard/lists/[id]` – list detail + items
 - `/dashboard/dates` – important dates (add + view + edit + delete)
-- `/dashboard/household` – workspace switcher + invite link generation (UI term: “Workspace”)
+- `/dashboard/household` – workspace switcher + invite link generation/sharing (UI term: “Workspace”)
 
 ### Household join (protected)
 
