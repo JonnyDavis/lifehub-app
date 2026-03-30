@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Clock3, Pencil, Trash2 } from "lucide-react";
 
 import { deleteImportantDate } from "@/lib/actions/important-dates";
 import {
@@ -28,41 +29,50 @@ function ViewImportantDateCard({
   const category = date.category;
   const anchorId = `date-${date.id}`;
   const scopeQuery = selectedScope === "all" ? "" : `&scope=${selectedScope}`;
+  const iconButtonClass =
+    "inline-flex h-10 w-10 items-center justify-center rounded leading-none";
 
   return (
     <li id={anchorId} className="bg-gray-300 p-3 rounded scroll-mt-24">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="font-medium truncate">{date.title}</div>
+          <div className="flex flex-wrap items-center gap-2 min-w-0">
+            <div className="font-medium wrap-break-word">{date.title}</div>
             <ImportantDateCategoryBadge category={category} />
             <VisibilityScopeBadge scope={date.scope} />
           </div>
           <div className="text-sm text-gray-700">
             {formatImportantDateLabel(date.date)}
           </div>
-          <div className="text-sm text-gray-700 mt-1">
-            🕒 {relativeImportantDateDistanceLabel(date.date)}
+          <div className="mt-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-200 px-3 py-1 text-xs text-gray-700">
+              <Clock3 className="h-4 w-4" />
+              {relativeImportantDateDistanceLabel(date.date)}
+            </span>
           </div>
           {date.notes ? (
-            <div className="text-sm text-gray-700 mt-1">{date.notes}</div>
+            <div className="mt-3 text-sm text-gray-700">{date.notes}</div>
           ) : null}
         </div>
-        <div className="flex flex-col items-end gap-2 shrink-0">
+        <div className="flex w-full justify-end gap-4 sm:gap-2 shrink-0 sm:w-auto sm:self-start">
           <Link
             href={`/dashboard/dates?view=${selectedView}${scopeQuery}&edit=${date.id}#${anchorId}`}
-            className="text-sm text-blue-600 hover:underline"
+            className={`${iconButtonClass} text-blue-700 hover:bg-blue-50`}
             scroll={false}
+            aria-label={`Edit ${date.title}`}
+            title="Edit"
           >
-            Edit
+            <Pencil className="h-4 w-4" />
           </Link>
           <form action={deleteImportantDate}>
             <input type="hidden" name="id" value={date.id} />
             <button
               type="submit"
-              className="text-sm text-blue-600 hover:underline"
+              className={`${iconButtonClass} text-red-700 hover:bg-red-50`}
+              aria-label={`Delete ${date.title}`}
+              title="Delete"
             >
-              Delete
+              <Trash2 className="h-4 w-4" />
             </button>
           </form>
         </div>
@@ -87,6 +97,8 @@ export function ImportantDatesList({
   emptyMessage: string;
 }) {
   const dateViews = dates.map(presentImportantDate);
+  const iconButtonClass =
+    "inline-flex h-10 w-10 items-center justify-center rounded leading-none";
 
   return (
     <section className="bg-gray-200 p-4 rounded text-black">
@@ -96,33 +108,40 @@ export function ImportantDatesList({
       ) : (
         <ul className="grid gap-3">
           {dateViews.map((d) =>
-            editingId === d.id ? (() => {
-              const anchorId = `date-${d.id}`;
-              return (
-                <li
-                  key={d.id}
-                  id={anchorId}
-                  className="bg-gray-300 p-3 rounded scroll-mt-24"
-                >
-                  <div className="grid gap-3">
-                    <EditImportantDateForm
-                      date={d}
-                      selectedView={selectedView}
-                      selectedScope={selectedScope}
-                    />
-                    <form action={deleteImportantDate} className="flex justify-end">
-                      <input type="hidden" name="id" value={d.id} />
-                      <button
-                        type="submit"
-                        className="text-sm text-red-700 hover:underline"
+            editingId === d.id ? (
+              (() => {
+                const anchorId = `date-${d.id}`;
+                return (
+                  <li
+                    key={d.id}
+                    id={anchorId}
+                    className="bg-gray-300 p-3 rounded scroll-mt-24"
+                  >
+                    <div className="grid gap-3">
+                      <EditImportantDateForm
+                        date={d}
+                        selectedView={selectedView}
+                        selectedScope={selectedScope}
+                      />
+                      <form
+                        action={deleteImportantDate}
+                        className="flex justify-end"
                       >
-                        Delete
-                      </button>
-                    </form>
-                  </div>
-                </li>
-              );
-            })() : (
+                        <input type="hidden" name="id" value={d.id} />
+                        <button
+                          type="submit"
+                          className={`${iconButtonClass} text-red-700 hover:bg-red-50`}
+                          aria-label={`Delete ${d.title}`}
+                          title="Delete"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </form>
+                    </div>
+                  </li>
+                );
+              })()
+            ) : (
               <ViewImportantDateCard
                 key={d.id}
                 date={d}

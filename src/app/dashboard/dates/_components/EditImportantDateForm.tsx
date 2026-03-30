@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
+import { Clock3 } from "lucide-react";
 
 import { updateImportantDate } from "@/lib/actions/important-dates";
 import { ImportantDateCategoryBadge } from "@/components/important-date-category-badge";
@@ -10,7 +11,10 @@ import {
   relativeImportantDateDistanceLabel,
 } from "@/lib/format/date";
 import { IMPORTANT_DATE_CATEGORIES } from "@/types/important-dates";
-import type { ImportantDateView, ImportantDatesView } from "@/types/important-dates";
+import type {
+  ImportantDateView,
+  ImportantDatesView,
+} from "@/types/important-dates";
 import { importantDateCategoryLabel } from "@/lib/presenters/important-dates";
 import {
   VISIBILITY_SCOPES,
@@ -75,28 +79,23 @@ export function EditImportantDateForm({
 
   return (
     <>
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="font-medium truncate">Editing</div>
+          <div className="flex flex-wrap items-center gap-2 min-w-0">
+            <div className="font-medium">Editing</div>
             <ImportantDateCategoryBadge category={category} />
             <VisibilityScopeBadge scope={scope} />
           </div>
           <div className="text-sm text-gray-700">
             {formatImportantDateLabel(cleanDate)}
           </div>
-          <div className="text-sm text-gray-700 mt-1">
-            🕒 {relativeImportantDateDistanceLabel(cleanDate)}
+          <div className="mt-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-200 px-3 py-1 text-xs text-gray-700">
+              <Clock3 className="h-4 w-4" />
+              {relativeImportantDateDistanceLabel(cleanDate)}
+            </span>
           </div>
         </div>
-        <Link
-          href={`/dashboard/dates?view=${selectedView}${scopeQuery}#${anchorId}`}
-          className="text-sm text-blue-600 hover:underline"
-          scroll={false}
-          aria-disabled={isPending}
-        >
-          Cancel
-        </Link>
       </div>
 
       <form
@@ -135,7 +134,8 @@ export function EditImportantDateForm({
               value={dateValue}
               onChange={(e) => setDateValue(e.target.value)}
               disabled={isPending}
-              className="w-full rounded border border-gray-400 bg-white px-3 py-2 text-sm text-black shadow-sm disabled:opacity-60"
+              className="block w-full appearance-none rounded border border-gray-400 bg-white px-3 py-2 text-sm text-black shadow-sm disabled:opacity-60"
+              style={{ WebkitAppearance: "none" }}
             />
           </div>
 
@@ -197,9 +197,22 @@ export function EditImportantDateForm({
         </div>
 
         <div className="flex items-center justify-between gap-4">
+          <Link
+            href={`/dashboard/dates?view=${selectedView}${scopeQuery}#${anchorId}`}
+            className="rounded border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
+            scroll={false}
+            aria-disabled={isPending}
+          >
+            Cancel
+          </Link>
           <button
             type="submit"
-            disabled={isPending || !isDirty || cleanTitle.length === 0 || cleanDate.length === 0}
+            disabled={
+              isPending ||
+              !isDirty ||
+              cleanTitle.length === 0 ||
+              cleanDate.length === 0
+            }
             className="rounded bg-black text-white px-4 py-2 text-sm font-medium disabled:opacity-60"
           >
             Save
