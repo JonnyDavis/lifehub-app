@@ -43,11 +43,11 @@ export default async function Page({ params, searchParams }: ListPageProps) {
           </section>
         ) : null}
         <section className="flex items-start gap-4">
-          <div className="flex gap-4 min-w-0">
+          <div className="flex flex-col gap-3 min-w-0 sm:flex-row sm:items-start sm:gap-4">
             <ListAvatar avatar={listView.avatar} />
             <div className="min-w-0">
-              <div className="flex items-center gap-2 min-w-0">
-                <h2 className="text-lg font-semibold mb-2 truncate">
+              <div className="flex flex-wrap items-center gap-2 min-w-0">
+                <h2 className="text-lg font-semibold truncate">
                   {listView.title}
                 </h2>
                 {listView.badgeCategory ? (

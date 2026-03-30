@@ -40,7 +40,7 @@ export function ToggleItemCheckbox({
     <input
       type="checkbox"
       name={`item-done-${itemId}`}
-      className="w-4 h-4"
+      className="mt-0.5 h-5 w-5 shrink-0"
       checked={checked}
       disabled={isPending}
       onChange={handleChange}
