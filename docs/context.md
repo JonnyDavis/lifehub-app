@@ -30,7 +30,7 @@ When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`):
 - `/dashboard/lists` – lists index
 - `/dashboard/lists/[id]` – list detail + items
 - `/dashboard/dates` – important dates (add + view + edit + delete)
-- `/dashboard/household` – workspace switcher + invite link generation (UI term: “Workspace”)
+- `/dashboard/household` – workspace switcher + invite link generation/sharing (UI term: “Workspace”)
 
 ### Household join (protected)
 
@@ -97,13 +97,10 @@ When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`):
 - (Future) Public demo mode: logged-out users can view a default dataset, and can “edit” in the UI, but saving requires creating/logging into an account.
   - Draft edits for logged-out users should stay client-side (in-memory / local storage) and be imported into the user’s household on signup/login.
   - RLS should remain deny-by-default; if we add public access, it should be narrow `anon` read-only access to demo-only data (e.g. separate demo tables or a dedicated demo household), not “`household_id IS NULL` means public”.
-- Validation is mostly manual (no Zod yet), and error handling is minimal in server actions.
+- List/date create flows now redirect to a visible success state with lightweight query-string banners, but validation is still mostly manual (no Zod yet).
 - No automated tests yet.
 - Bootstrapping defaults are still tracked per-user (`profiles.bootstrap_state`), not per-household.
   - This is good enough for now, but will likely need revisiting once users regularly switch between multiple households.
-- Important date & List create flows could do with reworking slightly.
-  - Redirect to created list to populate list items, instead of staying on `/dashboard/lists`.
-  - Created dates that don't meet the `upcoming` criteria should instigate a redirect to a visible tab that includes that date e.g. `past`. Important for positive user feedback.
 - Implement a delete action for Lists.
 
 ## Keeping Codex up to date

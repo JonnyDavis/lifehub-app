@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "LifeHub: Next server",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "pnpm dev --hostname 0.0.0.0",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "LifeHub: Chrome",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "LifeHub: Full stack",
+      "configurations": ["LifeHub: Next server", "LifeHub: Chrome"]
+    }
+  ]
+}

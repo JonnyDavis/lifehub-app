@@ -31,6 +31,19 @@ function parseListCategoryWithDefault(value: unknown) {
   return normalizeListCategory(value) ?? "other";
 }
 
+// Keep list-create failures on the index page and preserve the active scope tab.
+function listCreateErrorPath(
+  scopeFilter: FormDataEntryValue | null,
+  error: "missing_title" | "create_failed",
+) {
+  const cleanScopeFilter = normalizeVisibilityFilter(scopeFilter);
+  const params = new URLSearchParams({ error });
+  if (cleanScopeFilter !== "all") {
+    params.set("scope", cleanScopeFilter);
+  }
+  return `/dashboard/lists?${params.toString()}`;
+}
+
 function parseListIconForUpdate(value: FormDataEntryValue | null): {
   ok: boolean;
   nextIcon: ListIconKey | null;
@@ -58,36 +71,33 @@ export async function createList(formData: FormData) {
   const scopeFilter = formData.get("scopeFilter");
 
   if (!cleanTitle) {
-    // TODO - handle this error properly in the UI
-    return;
+    redirect(listCreateErrorPath(scopeFilter, "missing_title"));
   }
 
   const cleanCategory = parseListCategoryWithDefault(category);
   const cleanScope = normalizeVisibilityScope(scope);
-  const cleanScopeFilter = normalizeVisibilityFilter(scopeFilter);
 
-  const { error } = await listsTable(supabase).insert({
-    title: cleanTitle,
-    category: cleanCategory,
-    ...(cleanScope ? { scope: cleanScope } : {}),
-    // missing icon for now
-  });
+  const { data, error } = await listsTable(supabase)
+    .insert({
+      title: cleanTitle,
+      category: cleanCategory,
+      ...(cleanScope ? { scope: cleanScope } : {}),
+      // missing icon for now
+    })
+    .select("id")
+    .single();
 
   if (error) {
     console.error("Error creating list:", error);
-    // TODO - handle this error properly in the UI
-    return;
+    redirect(listCreateErrorPath(scopeFilter, "create_failed"));
   }
 
   // Update any pages that show lists to reflect the new list
   revalidatePath("/dashboard/lists");
   revalidatePath("/dashboard");
 
-  redirect(
-    cleanScopeFilter === "all"
-      ? "/dashboard/lists"
-      : `/dashboard/lists?scope=${cleanScopeFilter}`,
-  );
+  // Send the user straight into the new list so the next action is obvious.
+  redirect(`/dashboard/lists/${data.id}?created=1`);
 }
 
 export async function createListItem(formData: FormData) {

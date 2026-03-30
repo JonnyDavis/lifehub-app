@@ -4,17 +4,19 @@ This file is intentionally short; it’s meant to keep “what’s happening” 
 
 ## Now
 
-- Finish end-to-end verification of the household/workspace MVP and merge the branch.
-- Improve server action validation + user-facing error states.
-- Tidy list/date create flows so success states are clearer.
+- Run a final prod verification pass for the mobile-readiness branch (especially iPhone Safari + two-account workspace sharing flows).
+- Hand the app to a real user and collect friction notes from day-to-day use.
+- Merge the mobile-readiness branch once that verification pass feels solid.
 
 ## Next
 
 - Household naming + basic profile fields.
-- Better list UX (inline editing, ordering, mobile interactions).
-- Basic test coverage (component + integration; E2E later).
+- Refine auth UX where real usage shows friction (for example reset-password and invite/join flow clarity).
+- Add basic test coverage around auth and core CRUD flows.
 
 ## Later
 
+- Richer list UX (inline editing, ordering, and any mobile improvements that real usage proves necessary).
 - Roles/permissions inside shared workspaces.
+- Revisit the longer-term mobile path (responsive web vs PWA vs dedicated app) once real usage data is available.
 - Public demo mode with tightly scoped anon read access.

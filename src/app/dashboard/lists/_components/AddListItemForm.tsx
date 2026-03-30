@@ -6,11 +6,11 @@ export function AddListItemForm({ listId }: { listId: string }) {
       <h3 className="text-md font-semibold mb-2">Add item</h3>
       <form
         action={createListItem}
-        className="mb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-end"
+        className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end"
       >
         <input type="hidden" name="listId" value={listId} />
 
-        <div className="flex-1">
+        <div className="w-full flex-1">
           <label htmlFor="label" className="sr-only">
             Item name
           </label>
@@ -24,7 +24,7 @@ export function AddListItemForm({ listId }: { listId: string }) {
           />
         </div>
 
-        <div>
+        <div className="w-full sm:w-auto">
           <label htmlFor="quantity" className="sr-only">
             Quantity
           </label>
@@ -33,13 +33,13 @@ export function AddListItemForm({ listId }: { listId: string }) {
             name="quantity"
             type="text"
             placeholder="Quantity (optional)"
-            className="w-full rounded border border-gray-300 px-3 py-2 text-sm text-black"
+            className="w-full rounded border border-gray-300 px-3 py-2 text-sm text-black sm:min-w-40"
           />
         </div>
 
         <button
           type="submit"
-          className="rounded bg-black text-white px-4 py-2 text-sm font-medium"
+          className="w-full rounded bg-black text-white px-4 py-2 text-sm font-medium sm:w-auto"
         >
           Add
         </button>

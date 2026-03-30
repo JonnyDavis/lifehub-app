@@ -6,12 +6,15 @@ import {
   normalizeVisibilityScope,
   type VisibilityFilter,
 } from "@/types/visibility";
+import type { ImportantDatesView } from "@/types/important-dates";
 import { createClient } from "@/lib/supabase/server";
 
 export async function AddImportantDateForm({
   defaultScope,
+  selectedView,
 }: {
   defaultScope: VisibilityFilter;
+  selectedView: ImportantDatesView;
 }) {
   const scopeFromFilter =
     defaultScope === "personal" || defaultScope === "household"
@@ -35,6 +38,9 @@ export async function AddImportantDateForm({
     <section className="bg-gray-100 p-4 rounded mb-6">
       <h2 className="text-lg text-black font-semibold mb-3">Add a date</h2>
       <form action={createImportantDate} className="grid gap-3">
+        {/* Preserve the user's current filters so the action can redirect back to a visible state. */}
+        <input type="hidden" name="scopeFilter" value={defaultScope} />
+        <input type="hidden" name="view" value={selectedView} />
         <div>
           <label htmlFor="title" className="sr-only">
             Title

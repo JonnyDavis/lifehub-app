@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 export function DatesHeader() {
   return (
     <header className="flex items-start justify-between gap-4 mb-4">
@@ -9,10 +7,6 @@ export function DatesHeader() {
           Birthdays, appointments, trips—anything you don&apos;t want to miss.
         </p>
       </div>
-      <Link href="/dashboard" className="text-blue-500 hover:underline">
-        Back to dashboard
-      </Link>
     </header>
   );
 }
-
