@@ -3,7 +3,11 @@ import { redirect } from "next/navigation";
 
 import { InviteLinkActions } from "@/app/dashboard/household/_components/InviteLinkActions";
 import { createClient } from "@/lib/supabase/server";
-import { householdsTable, householdMembersTable, profilesTable } from "@/lib/supabase/tables";
+import {
+  householdsTable,
+  householdMembersTable,
+  profilesTable,
+} from "@/lib/supabase/tables";
 
 type HouseholdPageProps = {
   searchParams: Promise<{ token?: string; switched?: string; ts?: string }>;
@@ -56,7 +60,8 @@ export default async function Page({ searchParams }: HouseholdPageProps) {
     console.error("Error reading profile active household:", profileError);
   }
 
-  const activeHouseholdId = (profile?.active_household_id as string | null) ?? null;
+  const activeHouseholdId =
+    (profile?.active_household_id as string | null) ?? null;
 
   const { data: myMemberships, error: membershipsError } =
     await householdMembersTable(supabase)
@@ -101,7 +106,10 @@ export default async function Page({ searchParams }: HouseholdPageProps) {
               .in("household_id", householdIds);
 
           if (allMembersError) {
-            console.error("Error fetching household member counts:", allMembersError);
+            console.error(
+              "Error fetching household member counts:",
+              allMembersError,
+            );
             throw allMembersError;
           }
 
@@ -111,7 +119,10 @@ export default async function Page({ searchParams }: HouseholdPageProps) {
   const memberCountByHouseholdId = new Map<string, number>();
   for (const row of allMembers) {
     const hid = row.household_id as string;
-    memberCountByHouseholdId.set(hid, (memberCountByHouseholdId.get(hid) ?? 0) + 1);
+    memberCountByHouseholdId.set(
+      hid,
+      (memberCountByHouseholdId.get(hid) ?? 0) + 1,
+    );
   }
 
   // Keep the server-side value relative; the client resolves it against the active origin.
@@ -121,16 +132,17 @@ export default async function Page({ searchParams }: HouseholdPageProps) {
 
   return (
     <article className="grid gap-6">
-      <header className="flex items-baseline justify-between gap-4">
-        <div>
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-baseline sm:justify-between">
+        <div className="max-w-2xl">
           <h1 className="text-2xl font-bold">Workspace</h1>
           <p className="text-sm text-gray-700 mt-1">
-            Choose which workspace is active. Lists and dates are scoped to the active workspace.
+            Choose which workspace is active. Lists and dates are scoped to the
+            active workspace.
           </p>
         </div>
         <Link
           href="/dashboard/household/invite"
-          className="rounded bg-black text-white px-4 py-2 text-sm font-medium"
+          className="inline-flex items-center justify-center rounded bg-black px-4 py-2 text-sm font-medium text-white sm:self-start"
         >
           Create invite link
         </Link>
@@ -169,30 +181,29 @@ export default async function Page({ searchParams }: HouseholdPageProps) {
               });
 
               return (
-                <li
-                  key={hid}
-                  className="bg-gray-300 p-3 rounded flex items-center justify-between gap-4"
-                >
-                  <div className="min-w-0">
-                    <div className="font-medium truncate">{label}</div>
-                    <div className="text-xs text-gray-700 truncate mt-1">
-                      {hid}
+                <li key={hid} className="rounded bg-gray-300 p-3">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                    <div className="min-w-0">
+                      <div className="font-medium">{label}</div>
+                      <div className="mt-1 text-xs text-gray-600 break-all">
+                        Workspace ID: {hid}
+                      </div>
                     </div>
+                    {isActive ? (
+                      <span className="inline-flex items-center self-start rounded-full border border-green-300 bg-green-200 px-3 py-1 text-sm font-medium text-green-900">
+                        Active
+                      </span>
+                    ) : (
+                      <Link
+                        href={`/dashboard/household/switch?householdId=${encodeURIComponent(
+                          hid,
+                        )}&next=${encodeURIComponent("/dashboard/household")}`}
+                        className="inline-flex items-center justify-center rounded border border-gray-400 bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-50 sm:self-start"
+                      >
+                        Make active
+                      </Link>
+                    )}
                   </div>
-                  {isActive ? (
-                    <span className="text-sm text-gray-900 whitespace-nowrap">
-                      Active
-                    </span>
-                  ) : (
-                    <Link
-                      href={`/dashboard/household/switch?householdId=${encodeURIComponent(
-                        hid,
-                      )}&next=${encodeURIComponent("/dashboard/household")}`}
-                      className="text-sm text-blue-700 hover:underline whitespace-nowrap"
-                    >
-                      Make active
-                    </Link>
-                  )}
                 </li>
               );
             })}
