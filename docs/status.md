@@ -12,7 +12,9 @@ This file is intentionally short; it’s meant to keep “what’s happening” 
 
 - Household naming + basic profile fields.
 - Refine auth UX where real usage shows friction (for example reset-password and invite/join flow clarity).
+- Add a recovery path for failed/expired signup confirmation links (for example resend confirmation for unconfirmed accounts).
 - Add basic test coverage around auth and core CRUD flows.
+- Rework the workspace model so each user keeps a permanent personal workspace and shared workspaces are created explicitly for collaboration.
 
 ## Later
 

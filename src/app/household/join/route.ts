@@ -11,6 +11,9 @@ export async function GET(request: Request) {
 
   const { data, error } = await supabase.auth.getClaims();
   if (error || !data?.claims) {
+    // Invite links are allowed to start from a logged-out state. Preserve the
+    // original join URL in `next` so the user can return here immediately after
+    // login/signup/email confirmation.
     const nextPath = `/household/join?token=${encodeURIComponent(token ?? "")}`;
     return NextResponse.redirect(
       new URL(`/auth/login?next=${encodeURIComponent(nextPath)}`, url),
@@ -35,6 +38,8 @@ export async function GET(request: Request) {
   const safeDashboardNext =
     safeNext && safeNext.startsWith("/dashboard") ? safeNext : null;
 
+  // After consuming the invite token and switching the active workspace, send
+  // the user into the dashboard. Any dashboard bootstrap/setup happens from
+  // there.
   return NextResponse.redirect(new URL(safeDashboardNext ?? "/dashboard", url));
 }
-

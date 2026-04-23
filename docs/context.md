@@ -18,7 +18,7 @@ This repo is also intended as a portfolio project: keep patterns clean and easy 
 - `/auth/sign-up-success` – shown after sign up when email confirmation is required
 - `/auth/forgot-password` – request reset email
 - `/auth/update-password` – set new password (requires active reset session; redirects to login if not authenticated)
-- `/auth/confirm` – GET route handler that verifies Supabase OTP
+- `/auth/confirm` – GET route handler that verifies Supabase OTP; on failure, redirects to login with a recovery message instead of a raw error page
 - `/auth/error` – simple error page
 
 When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`): `/auth/login`, `/auth/sign-up`, `/auth/forgot-password`, `/auth/sign-up-success`.
@@ -35,6 +35,13 @@ When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`):
 ### Household join (protected)
 
 - `/household/join` – accept an invite token and join a household
+
+Invite signup flow, as intended today:
+- a logged-out invite recipient opens `/household/join?token=...`
+- the app redirects them to `/auth/login?next=/household/join?token=...`
+- if they choose sign up, the signup email confirmation link carries that join URL in `next`
+- `/auth/confirm` should verify the OTP, establish the session, and redirect back to `/household/join?token=...`
+- `/household/join` accepts the invite for the authenticated user, switches the active workspace, and redirects to `/dashboard`
 
 `/dashboard/*` is protected in `src/app/dashboard/layout.tsx` via `supabase.auth.getClaims()`.
 
@@ -63,9 +70,15 @@ When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`):
   - `profiles.active_household_id` selects the current workspace.
   - RLS policies for lists/dates/items scope access to `public.current_household_id()` (the active workspace), not “any household you belong to”.
   - “Personal” content is personal within the active workspace, not a global user-level space across all workspaces.
+  - Current behavior still allows a user's original personal workspace to become the shared workspace they invite others into.
+    - This works for the MVP, but creates asymmetry once invitees also get their own personal workspace.
+    - The next phase should separate these concepts more clearly: one permanent personal workspace per user, plus distinct shared workspaces created for collaboration.
 - On first `/dashboard` load for a new user, the app:
   - ensures they have a “personal household” (household of 1)
-  - bootstraps a small default dataset (lists, items, dates) into that household
+  - ensures their profile/bootstrap state is marked complete
+  - does not automatically inject starter lists/dates during provisioning
+  - keeps that provisioning targeted at the user's personal household even if they
+    reached the dashboard through a shared workspace invite flow
 - Current lists queries/actions use the Supabase server client from `src/lib/supabase/server.ts`.
   - `lists` includes an optional `category` column (used for list “type”/category).
 
@@ -88,19 +101,30 @@ When authenticated, these routes redirect to `/dashboard` (or a valid `?next=`):
   - `profiles.active_household_id` selects the current household/workspace for reads and inserts.
   - Invite links allow adding other members to a household.
   - The UI says “Workspace”, but schema and route names still say `household`.
+  - Inviting someone currently shares the active workspace as-is; we do not yet distinguish between "permanent personal workspace" and "separately created shared workspace".
 - Phase 2 visibility (implemented):
   - Lists and dates can be marked as `personal` or `household`.
   - Defaults are privacy-first: personal when solo; household when shared.
   - Existing rows are treated as `personal` to avoid accidental sharing when households gain new members.
+  - In practice, the personal/household toggle only adds real value inside shared workspaces; in a purely personal workspace it is effectively redundant.
 - Roles/permissions are not implemented yet; all workspace members currently have full write access.
 - Household naming is not implemented yet; labels are inferred from creator + member count.
+- Future workspace model cleanup:
+  - Keep one permanent personal workspace per user.
+  - Add explicit creation of shared workspaces instead of converting the original personal workspace into the shared one.
+  - Limit invite links to shared workspaces.
+  - Hide the personal/household visibility choice when the active workspace is personal.
 - (Future) Public demo mode: logged-out users can view a default dataset, and can “edit” in the UI, but saving requires creating/logging into an account.
   - Draft edits for logged-out users should stay client-side (in-memory / local storage) and be imported into the user’s household on signup/login.
   - RLS should remain deny-by-default; if we add public access, it should be narrow `anon` read-only access to demo-only data (e.g. separate demo tables or a dedicated demo household), not “`household_id IS NULL` means public”.
 - List/date create flows now redirect to a visible success state with lightweight query-string banners, but validation is still mostly manual (no Zod yet).
+- Failed or expired signup confirmation links do not yet have a proper recovery flow.
+  - A user can already exist in Supabase Auth before their email is successfully confirmed.
+  - Profile creation / household setup / default-data bootstrap happen later, after a confirmed session reaches the dashboard bootstrap flow.
+  - We likely need a resend-confirmation path (and clearer messaging for unconfirmed accounts) so users are not stranded in a partially registered state.
 - No automated tests yet.
-- Bootstrapping defaults are still tracked per-user (`profiles.bootstrap_state`), not per-household.
-  - This is good enough for now, but will likely need revisiting once users regularly switch between multiple households.
+- Provisioning state is still tracked per-user (`profiles.bootstrap_state`), not per-household.
+  - This is good enough for now because provisioning only ensures account/personal-workspace setup, not per-workspace starter content.
 - Implement a delete action for Lists.
 
 ## Keeping Codex up to date

@@ -13,7 +13,8 @@ export default async function Page({
 
   const supabase = await createClient()
   const { data, error } = await supabase.auth.getClaims()
-  if (!error && data?.claims) {
+  const { data: userData, error: userError } = await supabase.auth.getUser()
+  if (!error && data?.claims && !userError && userData.user) {
     redirect(next ?? '/dashboard')
   }
 

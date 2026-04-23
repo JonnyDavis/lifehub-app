@@ -29,6 +29,7 @@ export function LoginForm({
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = getSafeNext(searchParams.get("next"));
+  const confirmationStatus = searchParams.get("confirmation");
   const nextQuery = next ? `?next=${encodeURIComponent(next)}` : "";
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -92,6 +93,12 @@ export function LoginForm({
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
+              {confirmationStatus === "failed" ? (
+                <p className="text-sm text-amber-700">
+                  That confirmation link is no longer valid. Try logging in to
+                  continue.
+                </p>
+              ) : null}
               {error && <p className="text-sm text-red-500">{error}</p>}
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Logging in..." : "Login"}
