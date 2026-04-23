@@ -2,14 +2,21 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "LifeHub: Next server",
+      "name": "LifeHub: Next server (localhost)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "pnpm dev",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "LifeHub: Next server (LAN)",
       "type": "node-terminal",
       "request": "launch",
       "command": "pnpm dev --hostname 0.0.0.0",
       "cwd": "${workspaceFolder}"
     },
     {
-      "name": "LifeHub: Chrome",
+      "name": "LifeHub: Chrome (localhost)",
       "type": "chrome",
       "request": "launch",
       "url": "http://localhost:3000",
@@ -18,8 +25,15 @@
   ],
   "compounds": [
     {
-      "name": "LifeHub: Full stack",
-      "configurations": ["LifeHub: Next server", "LifeHub: Chrome"]
+      "name": "LifeHub: Full stack (localhost)",
+      "configurations": [
+        "LifeHub: Next server (localhost)",
+        "LifeHub: Chrome (localhost)"
+      ]
+    },
+    {
+      "name": "LifeHub: Full stack (LAN)",
+      "configurations": ["LifeHub: Next server (LAN)"]
     }
   ]
 }

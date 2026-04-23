@@ -21,12 +21,12 @@ export default async function Layout({
     redirect("/auth/login");
   }
 
-  // We redirect new users through `/dashboard/bootstrap` to avoid doing DB writes
-  // during the Server Component render, which can race with the dashboard page's
-  // initial reads (and cause defaults to appear only after a refresh).
+  // We redirect new users through `/dashboard/bootstrap` to finish lightweight
+  // account provisioning outside the Server Component render.
   //
-  // This layout only *checks* whether bootstrapping is done; the bootstrap route
-  // is responsible for running the inserts and then redirecting back.
+  // This layout only *checks* whether provisioning is done; the bootstrap route
+  // is responsible for ensuring the personal workspace/profile state and then
+  // redirecting back.
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError || !userData.user) {
     redirect("/auth/login");
@@ -43,6 +43,9 @@ export default async function Layout({
     console.error("Error reading profile bootstrap state:", profileError);
   }
 
+  // New users are expected to pass through `/dashboard/bootstrap` before the
+  // dashboard renders normally. If provisioning never reaches `done`, this layout
+  // will keep redirecting there.
   // Anything other than `done` (including `null`) means we should run bootstrap.
   if (profile?.bootstrap_state !== "done") {
     redirect("/dashboard/bootstrap");

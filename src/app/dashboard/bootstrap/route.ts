@@ -17,7 +17,16 @@ export async function GET(request: Request) {
 
   // Run the idempotent bootstrap, then bounce back to `/dashboard` (or a safe
   // dashboard sub-route via `?next=`).
-  await ensureUserBootstrappedDefaults(supabase);
+  //
+  // Provisioning is intentionally separate from normal workspace CRUD:
+  // it ensures per-user/profile state and a personal workspace, but does not
+  // inject starter app data.
+  const provisioned = await ensureUserBootstrappedDefaults(supabase);
+  if (!provisioned) {
+    return NextResponse.redirect(
+      new URL("/auth/error?error=bootstrap_failed", url),
+    );
+  }
 
   const requestedNext = url.searchParams.get("next");
   const safeNext = getSafeNextFromOrigin(requestedNext, url.origin);

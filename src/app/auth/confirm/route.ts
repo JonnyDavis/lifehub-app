@@ -15,6 +15,10 @@ export async function GET(request: NextRequest) {
   if (token_hash && type) {
     const supabase = await createClient()
 
+    // Email confirmation links are expected to land here first. On success,
+    // Supabase should establish the browser session before we continue into the
+    // in-app destination carried in `next` (for example `/dashboard` or an
+    // invite-join URL).
     const { error } = await supabase.auth.verifyOtp({
       type,
       token_hash,
@@ -23,11 +27,22 @@ export async function GET(request: NextRequest) {
       // redirect user to specified redirect URL or root of app
       redirect(next)
     } else {
-      // redirect the user to an error page with some instructions
-      redirect(`/auth/error?error=${error?.message}`)
+      // Confirmation links are one-time use and may be retried by browsers/mail
+      // clients. If verification fails, send the user somewhere recoverable
+      // instead of leaving them on a dead-end technical error page.
+      const loginUrl = new URL('/auth/login', request.url)
+      loginUrl.searchParams.set('confirmation', 'failed')
+      if (next !== '/') {
+        loginUrl.searchParams.set('next', next)
+      }
+      redirect(loginUrl.toString())
     }
   }
 
-  // redirect the user to an error page with some instructions
-  redirect(`/auth/error?error=No token hash or type`)
+  const loginUrl = new URL('/auth/login', request.url)
+  loginUrl.searchParams.set('confirmation', 'failed')
+  if (next !== '/') {
+    loginUrl.searchParams.set('next', next)
+  }
+  redirect(loginUrl.toString())
 }

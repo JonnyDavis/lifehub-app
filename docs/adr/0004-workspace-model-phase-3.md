@@ -38,3 +38,24 @@ Use the workspace model.
 - A user’s “personal” rows in workspace A are not visible while they are switched into workspace B.
 - If we later want globally personal content, that should be designed explicitly as a separate phase rather than implied by the current `personal` scope.
 - Docs and code need to stay clear about the naming split: UI = workspace, schema = household.
+
+## Follow-up direction
+
+Real usage showed an additional product issue that this ADR did not settle:
+
+- if a user starts with a solo/personal workspace and later invites someone in,
+  that original workspace becomes shared
+- invitees still receive their own personal workspace, so the model becomes asymmetric
+- the app also needs a way to support multiple distinct shared spaces with
+  different members
+
+The likely next phase is:
+
+- keep one permanent personal workspace per user
+- add separately created shared workspaces for collaboration
+- restrict invites to shared workspaces
+- keep the current "active workspace" model for navigation/RLS
+- treat the personal/household visibility toggle as mainly meaningful inside shared workspaces
+
+That is a follow-up evolution of the product model, not a rejection of the Phase 3
+"active workspace" decision itself.

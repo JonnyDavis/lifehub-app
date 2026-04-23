@@ -32,6 +32,7 @@ Then run the app: `pnpm dev`
 
 If you made changes to the hosted project via the Supabase dashboard (SQL editor / table editor), pull them into migrations:
 
+- If you are on a new machine or a fresh CLI install, authenticate first: `npx supabase login`
 - Link to the hosted project (one-time): `npx supabase link --project-ref <ref>`
 - Pull schema into a new migration: `npx supabase db pull`
 
@@ -59,7 +60,7 @@ Local dev data is intentionally **not** committed.
 - `supabase/seed.sql` is git-ignored (see `supabase/.gitignore`) and is intended for local-only dumps/experiments.
 - The local stack loads `supabase/seed.default.sql` during `npx supabase db reset` (see `supabase/config.toml`).
 
-Note: with strict per-user RLS enabled, rows inserted by `seed.default.sql` may not be visible in-app unless they are owned by your authenticated user (e.g. `user_id = auth.uid()`). In practice, after `db reset`, the app bootstraps a small default dataset on first `/dashboard` load for each new user (or you can load a local-only `seed.sql` captured after creating data while logged in).
+Note: with strict RLS enabled, rows inserted by `seed.default.sql` may not be visible in-app unless they line up with the authenticated user's workspace and visibility scope. The app no longer injects starter lists/dates on first `/dashboard` load, so local seed data is mainly for database-level/manual testing unless you also load user-owned data while logged in.
 
 ### Keep local data between `db reset`s
 
